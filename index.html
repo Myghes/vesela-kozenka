@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a1326">
-<meta name="description" content="Elektrotechnická kalkulačka Veselá kozenka – Ohmův zákon, rezistory, barevné proužky, SMD kódy, dělič napětí a spotřeba elektřiny.">
-<title>Elektrotechnická kalkulačka Veselá kozenka · v2.1.2</title>
+<meta name="description" content="Elektrotechnická kalkulačka Veselá kozenka – Ohmův zákon, rezistory, barevné proužky, SMD kódy, baterie, vodiče, transformátory, dělič napětí a spotřeba elektřiny.">
+<title>Elektrotechnická kalkulačka Veselá kozenka · v2.2</title>
 <link rel="icon" type="image/png" sizes="48x48" href="./favicon-48.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -150,6 +150,16 @@ body.picker-open{overflow:hidden}
 .smd-graphic #smd-marking{font:800 53px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:2px;fill:#e7eff4}
 @media(max-width:440px){.smd-graphic #smd-marking{font-size:52px}.smd-stage{margin-bottom:14px}.smd-entry-fields{grid-template-columns:1fr}}
 
+
+/* Nové výpočty v2.2: baterie, vodiče a transformátory */
+.calc-hint{margin:12px 0 0;padding:12px 14px;border:1px solid #35586c;border-radius:12px;background:#10253a;color:#bcd2e5;font-size:13px;line-height:1.55}
+.calc-hint strong{color:#71e6d1}
+.calc-fields-gap{margin-top:13px}
+.circuit-mini{display:flex;align-items:center;gap:14px;padding:12px 14px;margin:0 0 18px;border:1px solid #345067;border-radius:13px;background:#112238;color:#bad1e1}
+.circuit-mini .mini-symbol{font-size:26px;line-height:1;flex:none}
+.circuit-mini .mini-copy{font-size:13px}
+.circuit-mini .mini-copy strong{display:block;color:#f1f6ff;font-size:14px}
+@media(max-width:400px){.calc-hint{padding:10px 11px}.circuit-mini{padding:10px 11px;gap:10px}.circuit-mini .mini-symbol{font-size:23px}}
 </style>
 </head>
 <body>
@@ -167,6 +177,9 @@ body.picker-open{overflow:hidden}
       <option value="smd">🔢 SMD kód rezistoru</option>
       <option value="divider">📉 Odporový dělič napětí</option>
       <option value="energy">🔌 Spotřeba a cena elektřiny</option>
+      <option value="battery">🔋 Výdrž baterie</option>
+      <option value="wire">📏 Odpor vodiče podle délky</option>
+      <option value="transformer">🧲 Převod závitů transformátoru</option>
     </select>
   </label>
 </nav>
@@ -280,7 +293,77 @@ body.picker-open{overflow:hidden}
 
 <section class="panel" id="divider" aria-label="Dělič napětí"><div class="card"><h2>Odporový dělič napětí</h2><p class="sub">Dva rezistory v sérii. Výstupní napětí se měří na spodním R₂.</p><div class="fields three"><label class="field"><span>Vstupní napětí</span><div class="control"><input id="du" type="text" inputmode="decimal" value="12"><span class="unit">V</span></div></label><label class="field"><span>Horní R₁</span><div class="control"><input id="dr1" type="text" inputmode="decimal" value="1000"><span class="unit">Ω</span></div></label><label class="field"><span>Spodní R₂</span><div class="control"><input id="dr2" type="text" inputmode="decimal" value="1000"><span class="unit">Ω</span></div></label></div></div><div class="card"><div class="result-label">Výsledek</div><div id="divider-result" class="result-grid" aria-live="polite"></div><div class="formula"><code>Uout = Uin × R₂ / (R₁ + R₂)</code></div><p class="helper">Platí pro nezatížený výstup; připojená zátěž může výsledek změnit.</p></div></section>
  <section class="panel" id="energy" aria-label="Spotřeba elektřiny"><div class="card"><h2>Spotřeba a cena elektřiny</h2><p class="sub">Spočítej spotřebu zařízení za vybrané období a orientační cenu.</p><div class="fields"><label class="field"><span>Příkon zařízení</span><div class="control"><input id="ep" type="text" inputmode="decimal" value="100"><span class="unit">W</span></div></label><label class="field"><span>Hodin denně</span><div class="control"><input id="eh" type="text" inputmode="decimal" value="5"><span class="unit">h</span></div></label><label class="field"><span>Počet dní</span><div class="control"><input id="ed" type="text" inputmode="decimal" value="30"><span class="unit">dní</span></div></label><label class="field"><span>Cena za 1 kWh</span><div class="control"><input id="ec" type="text" inputmode="decimal" value="6"><span class="unit">Kč</span></div></label></div></div><div class="card"><div class="result-label">Výsledná spotřeba</div><div id="energy-result" class="result-grid" aria-live="polite"></div><p class="helper">Cena je orientační: vypočítaná spotřeba × zadaná cena za kWh. Nezahrnuje samostatně stálé měsíční poplatky.</p></div></section>
- <footer class="footer">🐐 Veselá kozenka · v2.1.2</footer>
+
+<section class="panel" id="battery" aria-label="Výdrž baterie">
+ <div class="card">
+  <h2>Výpočet výdrže baterie</h2>
+  <p class="sub">Spočítej orientační dobu provozu zařízení podle kapacity baterie, napětí a odběru.</p>
+  <div class="circuit-mini"><span class="mini-symbol" aria-hidden="true">🔋</span><div class="mini-copy"><strong>Baterie → zařízení</strong>Výpočet energie a času při přibližně konstantním odběru.</div></div>
+  <div class="fields">
+   <div class="field"><span>Kapacita baterie</span>
+    <div class="control">
+     <input id="bat-cap" class="with-unit" aria-label="Kapacita baterie" type="text" inputmode="decimal" value="20">
+     <select id="bat-cap-unit" class="unit-choice" aria-label="Jednotka kapacity baterie"><option value="Ah" selected>Ah</option><option value="mAh">mAh</option><option value="Wh">Wh</option><option value="kWh">kWh</option></select>
+    </div>
+   </div>
+   <label class="field"><span>Jmenovité napětí baterie</span><div class="control"><input id="bat-voltage" type="text" inputmode="decimal" value="12"><span class="unit">V</span></div></label>
+   <div class="field"><span>Odběr zařízení</span><div class="control"><input id="bat-load" class="with-unit" aria-label="Odběr zařízení" type="text" inputmode="decimal" value="20"><select id="bat-load-unit" class="unit-choice" aria-label="Jednotka odběru"><option value="W" selected>W</option><option value="A">A</option><option value="mA">mA</option></select></div></div>
+   <label class="field"><span>Využitelná kapacita</span><div class="control"><input id="bat-usable" type="text" inputmode="decimal" value="80"><span class="unit">%</span></div></label>
+   <label class="field"><span>Účinnost napájení</span><div class="control"><input id="bat-eff" type="text" inputmode="decimal" value="90"><span class="unit">%</span></div></label>
+  </div>
+  <p class="calc-hint"><strong>Jak to počítáme:</strong> energie baterie × využitelný podíl × účinnost ÷ příkon zařízení. Reálnou výdrž ovlivní stáří baterie, teplota i velikost odběru.</p>
+ </div>
+ <div class="card"><div class="result-label">Orientační výdrž</div><div id="battery-result" class="result-grid" aria-live="polite"></div></div>
+</section>
+
+<section class="panel" id="wire" aria-label="Odpor vodiče podle délky">
+ <div class="card">
+  <h2>Odpor vodiče podle délky</h2>
+  <p class="sub">Vypočítej odpor kabelu, úbytek napětí a ztráty podle délky, průřezu a materiálu.</p>
+  <div class="circuit-mini"><span class="mini-symbol" aria-hidden="true">📏</span><div class="mini-copy"><strong>Zdroj ─ vodič ─ spotřebič</strong>Délku zadávej v jednom směru; můžeš zahrnout i zpětný vodič.</div></div>
+  <div class="fields">
+   <div class="field"><span>Délka jedním směrem</span><div class="control"><input id="wire-length" class="with-unit" aria-label="Délka vedení" type="text" inputmode="decimal" value="10"><select id="wire-length-unit" class="unit-choice" aria-label="Jednotka délky"><option value="1" selected>m</option><option value="1000">km</option></select></div></div>
+   <label class="field"><span>Průřez vodiče</span><div class="control"><input id="wire-area" type="text" inputmode="decimal" value="2,5"><span class="unit">mm²</span></div></label>
+   <div class="field"><span>Materiál</span><select id="wire-material"><option value="0.0175" selected>Měď (Cu)</option><option value="0.0282">Hliník (Al)</option></select></div>
+   <div class="field"><span>Počítat</span><select id="wire-path"><option value="2" selected>Cestu tam i zpět</option><option value="1">Jeden vodič</option></select></div>
+   <label class="field"><span>Proud</span><div class="control"><input id="wire-current" type="text" inputmode="decimal" value="10"><span class="unit">A</span></div></label>
+   <label class="field"><span>Napájecí napětí</span><div class="control"><input id="wire-voltage" type="text" inputmode="decimal" value="12"><span class="unit">V</span></div></label>
+  </div>
+  <p class="calc-hint"><strong>Předpoklad:</strong> stejnosměrný obvod a odpor vodiče přibližně při 20 °C. U střídavých vedení, delších tras a zahřívaných kabelů jde jen o zjednodušený výpočet. Neurčuje bezpečný průřez instalace.</p>
+ </div>
+ <div class="card"><div class="result-label">Odpor a úbytek napětí</div><div id="wire-result" class="result-grid" aria-live="polite"></div>
+ <div class="formula"><code>R = ρ × ℓ / S</code> &nbsp;·&nbsp; <code>ΔU = I × R</code></div></div>
+</section>
+
+<section class="panel" id="transformer" aria-label="Převod závitů transformátoru">
+ <div class="card">
+  <h2>Závity transformátoru</h2>
+  <p class="sub">Zadej střídavá napětí primárního a sekundárního vinutí. Zjistíš převodový poměr a při dalších údajích i počet závitů.</p>
+  <div class="circuit-mini"><span class="mini-symbol" aria-hidden="true">🧲</span><div class="mini-copy"><strong>Primár ↔ sekundár</strong>Napětí a počty závitů jsou u ideálního transformátoru ve stejném poměru.</div></div>
+  <div class="fields">
+   <label class="field"><span>Vstupní napětí U₁ (AC)</span><div class="control"><input id="tr-u1" type="text" inputmode="decimal" value="230"><span class="unit">V</span></div></label>
+   <label class="field"><span>Výstupní napětí U₂ (AC)</span><div class="control"><input id="tr-u2" type="text" inputmode="decimal" value="12"><span class="unit">V</span></div></label>
+  </div>
+  <div class="field calc-fields-gap"><span>Jak určit počet závitů?</span>
+   <select id="tr-method"><option value="known" selected>Znám počet primárních závitů</option><option value="core">Orientační odhad z jádra</option></select>
+  </div>
+  <div id="tr-known-wrap" class="calc-fields-gap">
+   <label class="field"><span>Počet primárních závitů N₁ (nepovinné)</span><div class="control"><input id="tr-n1" type="text" inputmode="numeric" value="920" placeholder="Např. 920"><span class="unit">záv.</span></div></label>
+  </div>
+  <div id="tr-core-wrap" class="calc-fields-gap" hidden>
+   <div class="fields">
+    <label class="field"><span>Frekvence</span><div class="control"><input id="tr-f" type="text" inputmode="decimal" value="50"><span class="unit">Hz</span></div></label>
+    <label class="field"><span>Průřez magnetického jádra</span><div class="control"><input id="tr-area" type="text" inputmode="decimal" value="10"><span class="unit">cm²</span></div></label>
+    <label class="field"><span>Max. magnetická indukce</span><div class="control"><input id="tr-b" type="text" inputmode="decimal" value="1,2"><span class="unit">T</span></div></label>
+   </div>
+  </div>
+  <p class="calc-hint"><strong>Důležité:</strong> z napětí 230 V → 12 V známe pouze poměr závitů. K určení jejich počtu potřebujeme navíc N₁ nebo údaje o jádru. Výpočet předpokládá sinusové AC a ideální podmínky. Nestačí pro bezpečný návrh síťového transformátoru (izolace, oteplení, výkon a ochrany se musí řešit zvlášť).</p>
+ </div>
+ <div class="card"><div class="result-label">Převod a počet závitů</div><div id="transformer-result" class="result-grid" aria-live="polite"></div>
+ <div class="formula"><code>N₂ = N₁ × U₂ / U₁</code> &nbsp;·&nbsp; <code>N ≈ U / (4,44 × f × B × S)</code> <span style="color:var(--muted)">(S v m²)</span></div></div>
+</section>
+
+ <footer class="footer">🐐 Veselá kozenka · v2.2</footer>
 </main>
 <div class="picker-overlay" id="picker-overlay" hidden>
  <div class="picker-dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
@@ -712,6 +795,139 @@ function initSmd(){
  smdFromCode();
 }
 
+
+/* Nové kalkulačky: výdrž baterie, odpor vodiče a převod transformátoru. */
+function batteryCapacityWh(amount,unit,voltage){
+ if(unit==='mAh')return amount*.001*voltage;
+ if(unit==='Ah')return amount*voltage;
+ if(unit==='Wh')return amount;
+ if(unit==='kWh')return amount*1000;
+ return NaN;
+}
+function batteryLoadW(amount,unit,voltage){
+ if(unit==='W')return amount;
+ if(unit==='A')return amount*voltage;
+ if(unit==='mA')return amount*.001*voltage;
+ return NaN;
+}
+function calcBattery(){
+ const capacity=parse($('bat-cap').value),voltage=parse($('bat-voltage').value),load=parse($('bat-load').value);
+ const use=parse($('bat-usable').value),eff=parse($('bat-eff').value);
+ if(![capacity,voltage,load,use,eff].every(Number.isFinite)||capacity<=0||voltage<=0||load<=0||use<=0||use>100||eff<=0||eff>100){
+  fail('battery-result','Zadej kladnou kapacitu, napětí a odběr. Procenta musí být větší než 0 a nejvýše 100.');return;
+ }
+ const wh=batteryCapacityWh(capacity,$('bat-cap-unit').value,voltage);
+ const watts=batteryLoadW(load,$('bat-load-unit').value,voltage);
+ const usableWh=wh*(use/100)*(eff/100),hours=usableWh/watts;
+ if(![wh,watts,usableWh,hours].every(Number.isFinite)||hours<=0){
+  fail('battery-result','Hodnoty jsou mimo rozsah výpočtu.');return;
+ }
+ show('battery-result',[
+  metric('Odhadovaná výdrž',number(hours)+' h',true),
+  metric('Přibližně',number(hours/24)+' dne'),
+  metric('Využitelná energie',number(usableWh)+' Wh'),
+  metric('Odběr zařízení',pretty(watts,'P'),false)
+ ]);
+}
+function onBatteryUnitChanged(id,previous,newUnit){
+ const voltage=parse($('bat-voltage').value),field=id==='bat-cap-unit'?'bat-cap':'bat-load';
+ const amount=parse($(field).value);
+ if(Number.isFinite(amount)&&Number.isFinite(voltage)&&voltage>0){
+  if(id==='bat-cap-unit'){
+   const energy=batteryCapacityWh(amount,previous,voltage);
+   const next=({mAh:energy/voltage*1000,Ah:energy/voltage,Wh:energy,kWh:energy/1000})[newUnit];
+   if(Number.isFinite(next))$(field).value=editableNumber(next);
+  }else{
+   const power=batteryLoadW(amount,previous,voltage);
+   const next=({W:power,A:power/voltage,mA:power/voltage*1000})[newUnit];
+   if(Number.isFinite(next))$(field).value=editableNumber(next);
+  }
+ }
+ calcBattery();
+}
+function wireResistance(lengthMeters,areaMm2,rho,paths){return rho*lengthMeters*paths/areaMm2}
+function calcWire(){
+ const length=parse($('wire-length').value)*Number($('wire-length-unit').value);
+ const area=parse($('wire-area').value),rho=Number($('wire-material').value),paths=Number($('wire-path').value);
+ const current=parse($('wire-current').value),voltage=parse($('wire-voltage').value);
+ if(![length,area,rho,paths,current,voltage].every(Number.isFinite)||length<=0||area<=0||current<0||voltage<=0){
+  fail('wire-result','Zadej kladnou délku, průřez a napětí. Proud může být i 0 A.');return;
+ }
+ const resistance=wireResistance(length,area,rho,paths),drop=resistance*current,loss=drop*current,pct=drop/voltage*100;
+ if(![resistance,drop,loss,pct].every(Number.isFinite)){
+  fail('wire-result','Hodnoty jsou mimo rozsah výpočtu.');return;
+ }
+ show('wire-result',[
+  metric('Odpor vedení',pretty(resistance,'R'),true),
+  metric('Úbytek napětí',pretty(drop,'U'),true),
+  metric('Úbytek z napětí',number(pct)+' %'),
+  metric('Ztrátový výkon',pretty(loss,'P')),
+  metric('Napětí na konci (orientačně)',number(voltage-drop)+' V',false,true)
+ ]);
+}
+function transformerTurnsFromCore(voltage,f,areaCm2,fluxT){
+ return voltage/(4.44*f*areaCm2*1e-4*fluxT);
+}
+function calcTransformer(){
+ const u1=parse($('tr-u1').value),u2=parse($('tr-u2').value),method=$('tr-method').value;
+ $('tr-known-wrap').hidden=method!=='known';
+ $('tr-core-wrap').hidden=method!=='core';
+ if(![u1,u2].every(Number.isFinite)||u1<=0||u2<=0){
+  fail('transformer-result','Zadej kladné vstupní a výstupní střídavé napětí.');return;
+ }
+ const ratio=u1/u2;
+ if(!Number.isFinite(ratio)||ratio<=0){fail('transformer-result','Převodový poměr je mimo rozsah.');return}
+ const items=[
+  metric('Převodový poměr N₁ : N₂',number(ratio)+' : 1',true),
+  metric('Na 100 závitů primáru',number(100/ratio)+' záv. sekundáru')
+ ];
+ let n1,n2;
+ if(method==='known'){
+  if($('tr-n1').value.trim()===''){
+   show('transformer-result',[...items,metric('Počet závitů', 'Zadej N₁ nebo zvol odhad z jádra',false,true)]);return;
+  }
+  n1=parse($('tr-n1').value);
+  if(!Number.isFinite(n1)||n1<=0||!Number.isInteger(n1)){
+   fail('transformer-result','Počet primárních závitů musí být kladné celé číslo.');return;
+  }
+  n2=n1/ratio;
+ }else{
+  const freq=parse($('tr-f').value),area=parse($('tr-area').value),flux=parse($('tr-b').value);
+  if(![freq,area,flux].every(Number.isFinite)||freq<=0||area<=0||flux<=0){
+   fail('transformer-result','Zadej kladnou frekvenci, průřez jádra a magnetickou indukci.');return;
+  }
+  n1=transformerTurnsFromCore(u1,freq,area,flux);
+  n2=transformerTurnsFromCore(u2,freq,area,flux);
+ }
+ if(![n1,n2].every(Number.isFinite)||n1<=0||n2<=0||n1>1e12||n2>1e12){
+  fail('transformer-result','Počet závitů je mimo podporovaný rozsah.');return;
+ }
+ items.push(metric(method==='core'?'Odhad primárních závitů N₁':'Primární závity N₁',number(Math.ceil(n1))+' záv.',true));
+ items.push(metric(method==='core'?'Odhad sekundárních závitů N₂':'Sekundární závity N₂',number(Math.round(n2))+' záv.',true));
+ items.push(metric('Výpočet před zaokrouhlením',number(n2)+' záv. N₂',false,true));
+ show('transformer-result',items);
+}
+function initNewCalculators(){
+ const calcEvents={
+  'bat-cap':calcBattery,'bat-voltage':calcBattery,'bat-load':calcBattery,'bat-usable':calcBattery,'bat-eff':calcBattery,
+  'wire-length':calcWire,'wire-area':calcWire,'wire-current':calcWire,'wire-voltage':calcWire,
+  'tr-u1':calcTransformer,'tr-u2':calcTransformer,'tr-n1':calcTransformer,'tr-f':calcTransformer,'tr-area':calcTransformer,'tr-b':calcTransformer
+ };
+ for(const [id,calc] of Object.entries(calcEvents))$(id).addEventListener('input',calc);
+ let prevCap=$('bat-cap-unit').value,prevLoad=$('bat-load-unit').value;
+ $('bat-cap-unit').addEventListener('change',()=>{const value=$('bat-cap-unit').value;onBatteryUnitChanged('bat-cap-unit',prevCap,value);prevCap=value});
+ $('bat-load-unit').addEventListener('change',()=>{const value=$('bat-load-unit').value;onBatteryUnitChanged('bat-load-unit',prevLoad,value);prevLoad=value});
+ let prevLength=Number($('wire-length-unit').value);
+ $('wire-length-unit').addEventListener('change',()=>{
+  const factor=Number($('wire-length-unit').value),raw=parse($('wire-length').value);
+  if(Number.isFinite(raw))$('wire-length').value=editableNumber(raw*prevLength/factor);
+  prevLength=factor;calcWire();
+ });
+ for(const id of ['wire-material','wire-path'])$(id).addEventListener('change',calcWire);
+ $('tr-method').addEventListener('change',calcTransformer);
+ calcBattery();calcWire();calcTransformer();
+}
+
 $('tool-picker').addEventListener('change',()=>{
  const selected=$('tool-picker').value;
  for(const panel of document.querySelectorAll('.panel'))panel.classList.toggle('active',panel.id===selected);
@@ -805,6 +1021,7 @@ document.addEventListener('keydown',e=>{
 
 initCustomSelects();
 initSmd();
+initNewCalculators();
 </script>
 <script>
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
