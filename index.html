@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a1326">
-<meta name="description" content="Elektrotechnická kalkulačka Veselá kozenka – Ohmův zákon, rezistory, barevné proužky, dělič napětí a spotřeba elektřiny.">
-<title>Elektrotechnická kalkulačka Veselá kozenka · v2.0</title>
+<meta name="description" content="Elektrotechnická kalkulačka Veselá kozenka – Ohmův zákon, rezistory, barevné proužky, SMD kódy, dělič napětí a spotřeba elektřiny.">
+<title>Elektrotechnická kalkulačka Veselá kozenka · v2.1</title>
 <link rel="icon" type="image/png" sizes="48x48" href="./favicon-48.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -139,6 +139,17 @@ body.picker-open{overflow:hidden}
 .calculator-navigation .select-trigger:hover{border-color:#60d8bf}
 .reactive-schematic .circuit-wire{stroke-width:2.8}
 @media(max-width:440px){.calculator-navigation{padding:12px;margin-bottom:13px;border-radius:15px}.calculator-navigation .select-trigger{font-size:15px;padding:12px}}
+
+/* Veselá kozenka v2.1 · SMD resistor decoder */
+.smd-stage{display:flex;justify-content:center;align-items:center;margin:5px auto 19px;padding:7px;border-radius:18px;background:radial-gradient(ellipse at center,#284b58 0%,#17253b 67%);max-width:540px}
+.smd-graphic{display:block;width:min(100%,460px);height:auto;filter:drop-shadow(0 12px 9px #0005)}
+.smd-formats{margin:0 0 15px}
+.smd-info{padding:11px 13px;border:1px solid #416478;border-radius:12px;background:#10263b;color:#b9d2e5;font-size:13px;line-height:1.55;margin:14px 0 0}
+.smd-info strong{color:#6ce6cb}
+.smd-mode-note{margin:10px 0 0;color:var(--muted);font-size:12px}
+.smd-graphic #smd-marking{font:900 53px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:2px;fill:#d9e2e4;paint-order:stroke fill;stroke:#000a;stroke-width:1px}
+@media(max-width:440px){.smd-graphic #smd-marking{font-size:52px}.smd-stage{margin-bottom:14px}}
+
 </style>
 </head>
 <body>
@@ -153,6 +164,7 @@ body.picker-open{overflow:hidden}
       <option value="capacitors">🔋 Skládání kondenzátorů</option>
       <option value="inductors">🧲 Skládání cívek</option>
       <option value="bands">🎨 Barvy rezistoru</option>
+      <option value="smd">🔢 SMD kód rezistoru</option>
       <option value="divider">📉 Odporový dělič napětí</option>
       <option value="energy">🔌 Spotřeba a cena elektřiny</option>
     </select>
@@ -230,9 +242,51 @@ body.picker-open{overflow:hidden}
   </div>
 </div>
 <div class="card"><div class="result-label">Hodnota rezistoru</div><div id="bands-result" class="result-grid" aria-live="polite"></div><p class="helper" id="bands-help">Barvy se čtou zleva doprava. Poslední proužek udává toleranci.</p></div></section>
- <section class="panel" id="divider" aria-label="Dělič napětí"><div class="card"><h2>Odporový dělič napětí</h2><p class="sub">Dva rezistory v sérii. Výstupní napětí se měří na spodním R₂.</p><div class="fields three"><label class="field"><span>Vstupní napětí</span><div class="control"><input id="du" type="text" inputmode="decimal" value="12"><span class="unit">V</span></div></label><label class="field"><span>Horní R₁</span><div class="control"><input id="dr1" type="text" inputmode="decimal" value="1000"><span class="unit">Ω</span></div></label><label class="field"><span>Spodní R₂</span><div class="control"><input id="dr2" type="text" inputmode="decimal" value="1000"><span class="unit">Ω</span></div></label></div></div><div class="card"><div class="result-label">Výsledek</div><div id="divider-result" class="result-grid" aria-live="polite"></div><div class="formula"><code>Uout = Uin × R₂ / (R₁ + R₂)</code></div><p class="helper">Platí pro nezatížený výstup; připojená zátěž může výsledek změnit.</p></div></section>
+ 
+<section class="panel" id="smd" aria-label="SMD kód rezistoru">
+ <div class="card">
+  <h2>SMD kód rezistoru</h2>
+  <p class="sub">Převeď potisk na SMD rezistoru na hodnotu odporu nebo zadej odpor a získej odpovídající kód. Obrázek se mění podle zadání.</p>
+  <div class="smd-stage">
+   <svg class="smd-graphic" viewBox="0 0 460 205" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Náhled SMD rezistoru s měnícím se kódem">
+    <defs>
+     <linearGradient id="smd-body-gradient" x1="0" y1="0" x2=".15" y2="1"><stop stop-color="#424950"/><stop offset=".27" stop-color="#202930"/><stop offset=".75" stop-color="#171f26"/><stop offset="1" stop-color="#0d151d"/></linearGradient>
+     <linearGradient id="smd-contact-gradient" x1="0" y1="0" x2=".15" y2="1"><stop stop-color="#e0ebed"/><stop offset=".25" stop-color="#9faeba"/><stop offset=".55" stop-color="#eef3f4"/><stop offset=".82" stop-color="#889ba8"/><stop offset="1" stop-color="#dae2e4"/></linearGradient>
+    </defs>
+    <ellipse cx="230" cy="176" rx="168" ry="12" fill="#0006"/>
+    <rect x="51" y="42" width="358" height="117" rx="22" fill="#060e15" stroke="#647987" stroke-width="2"/>
+    <rect x="59" y="48" width="342" height="105" rx="17" fill="url(#smd-body-gradient)"/>
+    <rect x="54" y="48" width="54" height="105" rx="15" fill="url(#smd-contact-gradient)" stroke="#d1dce1" stroke-width="1.5"/>
+    <rect x="352" y="48" width="54" height="105" rx="15" fill="url(#smd-contact-gradient)" stroke="#d1dce1" stroke-width="1.5"/>
+    <path d="M105 49v103M355 49v103" stroke="#6d7b89" stroke-width="3" opacity=".7"/>
+    <path d="M121 59h215" stroke="#87949b" stroke-width="2" opacity=".23"/>
+    <text id="smd-marking" x="230" y="119" text-anchor="middle" dominant-baseline="auto">472</text>
+    <text x="230" y="191" text-anchor="middle" fill="#97b1c5" font-size="12" font-weight="650">SMD • náhled potisku</text>
+   </svg>
+  </div>
+  <div class="field smd-formats"><span>Typ označení</span>
+   <select id="smd-format"><option value="3">Tříčíselný kód</option><option value="4">Čtyřčíselný kód</option><option value="R">Desetinný kód s R</option></select>
+  </div>
+  <div class="fields">
+   <label class="field"><span>SMD kód</span><div class="control"><input id="smd-code" type="text" inputmode="text" maxlength="6" autocapitalize="characters" autocomplete="off" spellcheck="false" value="472" placeholder="Např. 472"></div></label>
+   <label class="field"><span>Hodnota odporu</span><div class="control"><input id="smd-resistance" type="text" inputmode="decimal" value="4,7" placeholder="Např. 4,7"></div></label>
+  </div>
+  <div class="field" style="margin-top:12px;max-width:240px"><span>Jednotka odporu</span>
+   <select id="smd-unit"><option value="1">Ω</option><option value="1000" selected>kΩ</option><option value="1000000">MΩ</option></select>
+  </div>
+  <p class="smd-mode-note">Příklad: 472 = 4,7 kΩ · 4701 = 4,7 kΩ · 4R7 = 4,7 Ω. Kód zadávej bez mezer.</p>
+  <p id="smd-message" class="smd-info" aria-live="polite">Kód 472 odpovídá odporu 4,7 kΩ.</p>
+ </div>
+ <div class="card">
+  <div class="result-label">Výsledek dekódování</div>
+  <div id="smd-result" class="result-grid" aria-live="polite"></div>
+  <p class="helper">Značení není zaručené u všech součástek. Kódy 3 a 4 číslic ani označení R obvykle samy o sobě neurčují toleranci rezistoru.</p>
+ </div>
+</section>
+
+<section class="panel" id="divider" aria-label="Dělič napětí"><div class="card"><h2>Odporový dělič napětí</h2><p class="sub">Dva rezistory v sérii. Výstupní napětí se měří na spodním R₂.</p><div class="fields three"><label class="field"><span>Vstupní napětí</span><div class="control"><input id="du" type="text" inputmode="decimal" value="12"><span class="unit">V</span></div></label><label class="field"><span>Horní R₁</span><div class="control"><input id="dr1" type="text" inputmode="decimal" value="1000"><span class="unit">Ω</span></div></label><label class="field"><span>Spodní R₂</span><div class="control"><input id="dr2" type="text" inputmode="decimal" value="1000"><span class="unit">Ω</span></div></label></div></div><div class="card"><div class="result-label">Výsledek</div><div id="divider-result" class="result-grid" aria-live="polite"></div><div class="formula"><code>Uout = Uin × R₂ / (R₁ + R₂)</code></div><p class="helper">Platí pro nezatížený výstup; připojená zátěž může výsledek změnit.</p></div></section>
  <section class="panel" id="energy" aria-label="Spotřeba elektřiny"><div class="card"><h2>Spotřeba a cena elektřiny</h2><p class="sub">Spočítej spotřebu zařízení za vybrané období a orientační cenu.</p><div class="fields"><label class="field"><span>Příkon zařízení</span><div class="control"><input id="ep" type="text" inputmode="decimal" value="100"><span class="unit">W</span></div></label><label class="field"><span>Hodin denně</span><div class="control"><input id="eh" type="text" inputmode="decimal" value="5"><span class="unit">h</span></div></label><label class="field"><span>Počet dní</span><div class="control"><input id="ed" type="text" inputmode="decimal" value="30"><span class="unit">dní</span></div></label><label class="field"><span>Cena za 1 kWh</span><div class="control"><input id="ec" type="text" inputmode="decimal" value="6"><span class="unit">Kč</span></div></label></div></div><div class="card"><div class="result-label">Výsledná spotřeba</div><div id="energy-result" class="result-grid" aria-live="polite"></div><p class="helper">Cena je orientační: vypočítaná spotřeba × zadaná cena za kWh. Nezahrnuje samostatně stálé měsíční poplatky.</p></div></section>
- <footer class="footer">🐐 Veselá kozenka · v2.0</footer>
+ <footer class="footer">🐐 Veselá kozenka · v2.1</footer>
 </main>
 <div class="picker-overlay" id="picker-overlay" hidden>
  <div class="picker-dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
@@ -579,6 +633,91 @@ function calcBands(syncInput=true){
 }
 function calcDivider(){const u=siInput('du'),r1=siInput('dr1'),r2=siInput('dr2');if(![u,r1,r2].every(Number.isFinite)||u<0||r1<=0||r2<=0){fail('divider-result','Napětí musí být nezáporné, oba odpory musí být kladné.');return}const i=u/(r1+r2),out=i*r2;if(![i,out].every(Number.isFinite)){fail('divider-result','Hodnoty jsou mimo rozsah výpočtu.');return}show('divider-result',[metric('Výstupní napětí',pretty(out,'U'),true),metric('Proud děličem',pretty(i,'I')),metric('Napětí na R₁',pretty(u-out,'U')),metric('Celkový odpor',pretty(r1+r2,'R'))])}
 function calcEnergy(){const p=siInput('ep'),h=parse($('eh').value),d=parse($('ed').value),c=parse($('ec').value);if(![p,h,d,c].every(Number.isFinite)||p<0||h<0||h>24||d<=0||c<0){fail('energy-result','Zadej platná nezáporná čísla; počet hodin musí být 0–24 a počet dní větší než 0.');return}const kwh=p*h*d/1000,price=kwh*c;if(![kwh,price].every(Number.isFinite)){fail('energy-result','Hodnoty jsou mimo rozsah výpočtu.');return}show('energy-result',[metric('Celková spotřeba',number(kwh)+' kWh',true),metric('Orientační cena',number(price)+' Kč',true),metric('Spotřeba za den',number(p*h/1000)+' kWh'),metric('Cena za den',number(p*h/1000*c)+' Kč')])}
+
+/* SMD kódy: 3 číslice (47 × 10²), 4 číslice (470 × 10¹) a desetinné R. */
+function smdDecode(text){
+ const code=String(text).trim().toUpperCase().replace(/\s+/g,'');
+ if(/^\d{3,4}$/.test(code)){
+  if(/^0+$/.test(code))return {code,value:0,format:String(code.length)};
+  const digits=code.length===3?2:3;
+  const significant=Number(code.slice(0,digits)),multiplier=Number(code.at(-1));
+  if(significant<10**(digits-1))return {error:'První číslice musí být nenulová (výjimkou je nulový rezistor).'};
+  const value=significant*10**multiplier;
+  return Number.isFinite(value)?{code,value,format:String(code.length)}:{error:'Hodnota je mimo rozsah.'};
+ }
+ if(/^(?:\d+R\d*|R\d+)$/i.test(code) && code.length<=6){
+  const value=Number(code.replace('R','.'));
+  return Number.isFinite(value)?{code,value,format:'R'}:{error:'Neplatný desetinný kód.'};
+ }
+ return {error:'Neplatný kód. Použij 3 číslice, 4 číslice nebo například 4R7, R22 či 0R0.'};
+}
+function smdEncode(value,format){
+ if(!Number.isFinite(value)||value<0)return {error:'Zadej platnou nezápornou hodnotu odporu.'};
+ if(format==='R'){
+  if(value===0)return {code:'0R0',value:0};
+  if(value>=1000||value<.001)return {error:'Značení R je v této kalkulačce dostupné od 0,001 Ω do 999 Ω.'};
+  const rounded=Number(value.toPrecision(3));
+  const digits=rounded<1?rounded.toFixed(5).replace(/0+$/,''):String(rounded);
+  let code;
+  if(rounded<1)code='R'+digits.slice(2);
+  else {const parts=digits.split('.');code=parts[0]+'R'+(parts[1]||'0')}
+  if(code.length>6)return {error:'Pro takto malou hodnotu nelze vytvořit krátký kód R.'};
+  return {code,value:rounded};
+ }
+ const count=Number(format),digitCount=count-1,min=10**(digitCount-1),max=10**digitCount-1;
+ if(value===0)return {code:'0'.repeat(count),value:0};
+ let best=null;
+ for(let exponent=0;exponent<=9;exponent++){
+  const sig=Math.round(value/10**exponent);
+  if(sig<min||sig>max)continue;
+  const candidate=sig*10**exponent,delta=Math.abs(candidate-value);
+  if(!best||delta<best.delta){best={code:String(sig)+exponent,value:candidate,delta}}
+ }
+ return best||{error:count===3?'Tříčíselný kód pokrývá přibližně 10 Ω až 99 GΩ. Pro menší hodnoty zvol R.':'Čtyřčíselný kód pokrývá přibližně 100 Ω až 999 GΩ. Pro menší hodnoty zvol R.'};
+}
+let smdLastUnit=1000;
+function smdShow(code,ohms,message){
+ $('smd-marking').textContent=code||'—';
+ $('smd-message').textContent=message;
+ if(Number.isFinite(ohms)){
+  show('smd-result',[metric('Hodnota odporu',pretty(ohms,'R'),true),metric('Potisk SMD',code||'—'),metric('Formát',{'3':'3 číslice','4':'4 číslice','R':'Desetinné R'}[$('smd-format').value]||'—',false,true)]);
+ }else fail('smd-result',message);
+}
+function smdFromCode(){
+ const result=smdDecode($('smd-code').value);
+ if(result.error){smdShow($('smd-code').value.trim().toUpperCase()||'—',NaN,result.error);return}
+ $('smd-code').value=result.code;
+ $('smd-format').value=result.format;
+ syncSelectTrigger($('smd-format'));
+ const unit=Number($('smd-unit').value);
+ $('smd-resistance').value=editableNumber(result.value/unit);
+ smdShow(result.code,result.value,'✓ Kód '+result.code+' odpovídá odporu '+pretty(result.value,'R')+'.');
+}
+function smdFromResistance(){
+ const unit=Number($('smd-unit').value);
+ const ohms=parse($('smd-resistance').value)*unit;
+ const result=smdEncode(ohms,$('smd-format').value);
+ if(result.error){$('smd-code').value='';smdShow('—',NaN,result.error);return}
+ $('smd-code').value=result.code;
+ const exact=Math.abs(result.value-ohms)<=Math.max(1e-12,Math.abs(ohms)*1e-10);
+ smdShow(result.code,result.value,exact?
+   '✓ Přesná shoda: '+pretty(ohms,'R')+' → '+result.code+'.':
+   'Přibližná shoda: '+result.code+' = '+pretty(result.value,'R')+' (požadováno '+pretty(ohms,'R')+').');
+}
+function initSmd(){
+ $('smd-code').addEventListener('input',smdFromCode);
+ $('smd-resistance').addEventListener('input',smdFromResistance);
+ $('smd-format').addEventListener('change',smdFromResistance);
+ $('smd-unit').addEventListener('change',()=>{
+  const next=Number($('smd-unit').value),previous=smdLastUnit;
+  const value=parse($('smd-resistance').value);
+  if(Number.isFinite(value))$('smd-resistance').value=editableNumber(value*previous/next);
+  smdLastUnit=next;
+  smdFromResistance();
+ });
+ smdFromCode();
+}
+
 $('tool-picker').addEventListener('change',()=>{
  const selected=$('tool-picker').value;
  for(const panel of document.querySelectorAll('.panel'))panel.classList.toggle('active',panel.id===selected);
@@ -671,6 +810,7 @@ document.addEventListener('keydown',e=>{
 });
 
 initCustomSelects();
+initSmd();
 </script>
 <script>
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
