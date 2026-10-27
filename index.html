@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a1326">
 <meta name="description" content="Elektrotechnická kalkulačka Veselá kozenka – Ohmův zákon, rezistory, barevné proužky, SMD kódy, dělič napětí a spotřeba elektřiny.">
-<title>Elektrotechnická kalkulačka Veselá kozenka · v2.1</title>
+<title>Elektrotechnická kalkulačka Veselá kozenka · v2.1.1</title>
 <link rel="icon" type="image/png" sizes="48x48" href="./favicon-48.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -141,13 +141,13 @@ body.picker-open{overflow:hidden}
 @media(max-width:440px){.calculator-navigation{padding:12px;margin-bottom:13px;border-radius:15px}.calculator-navigation .select-trigger{font-size:15px;padding:12px}}
 
 /* Veselá kozenka v2.1 · SMD resistor decoder */
-.smd-stage{display:flex;justify-content:center;align-items:center;margin:5px auto 19px;padding:7px;border-radius:18px;background:radial-gradient(ellipse at center,#284b58 0%,#17253b 67%);max-width:540px}
-.smd-graphic{display:block;width:min(100%,460px);height:auto;filter:drop-shadow(0 12px 9px #0005)}
+.smd-stage{display:flex;justify-content:center;align-items:center;margin:6px auto 16px;padding:0;max-width:540px;background:transparent}
+.smd-graphic{display:block;width:min(100%,460px);height:auto;filter:none}
 .smd-formats{margin:0 0 15px}
 .smd-info{padding:11px 13px;border:1px solid #416478;border-radius:12px;background:#10263b;color:#b9d2e5;font-size:13px;line-height:1.55;margin:14px 0 0}
 .smd-info strong{color:#6ce6cb}
 .smd-mode-note{margin:10px 0 0;color:var(--muted);font-size:12px}
-.smd-graphic #smd-marking{font:900 53px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:2px;fill:#d9e2e4;paint-order:stroke fill;stroke:#000a;stroke-width:1px}
+.smd-graphic #smd-marking{font:800 53px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:2px;fill:#e7eff4}
 @media(max-width:440px){.smd-graphic #smd-marking{font-size:52px}.smd-stage{margin-bottom:14px}}
 
 </style>
@@ -248,20 +248,13 @@ body.picker-open{overflow:hidden}
   <h2>SMD kód rezistoru</h2>
   <p class="sub">Převeď potisk na SMD rezistoru na hodnotu odporu nebo zadej odpor a získej odpovídající kód. Obrázek se mění podle zadání.</p>
   <div class="smd-stage">
-   <svg class="smd-graphic" viewBox="0 0 460 205" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Náhled SMD rezistoru s měnícím se kódem">
-    <defs>
-     <linearGradient id="smd-body-gradient" x1="0" y1="0" x2=".15" y2="1"><stop stop-color="#424950"/><stop offset=".27" stop-color="#202930"/><stop offset=".75" stop-color="#171f26"/><stop offset="1" stop-color="#0d151d"/></linearGradient>
-     <linearGradient id="smd-contact-gradient" x1="0" y1="0" x2=".15" y2="1"><stop stop-color="#e0ebed"/><stop offset=".25" stop-color="#9faeba"/><stop offset=".55" stop-color="#eef3f4"/><stop offset=".82" stop-color="#889ba8"/><stop offset="1" stop-color="#dae2e4"/></linearGradient>
-    </defs>
-    <ellipse cx="230" cy="176" rx="168" ry="12" fill="#0006"/>
-    <rect x="51" y="42" width="358" height="117" rx="22" fill="#060e15" stroke="#647987" stroke-width="2"/>
-    <rect x="59" y="48" width="342" height="105" rx="17" fill="url(#smd-body-gradient)"/>
-    <rect x="54" y="48" width="54" height="105" rx="15" fill="url(#smd-contact-gradient)" stroke="#d1dce1" stroke-width="1.5"/>
-    <rect x="352" y="48" width="54" height="105" rx="15" fill="url(#smd-contact-gradient)" stroke="#d1dce1" stroke-width="1.5"/>
-    <path d="M105 49v103M355 49v103" stroke="#6d7b89" stroke-width="3" opacity=".7"/>
-    <path d="M121 59h215" stroke="#87949b" stroke-width="2" opacity=".23"/>
-    <text id="smd-marking" x="230" y="119" text-anchor="middle" dominant-baseline="auto">472</text>
-    <text x="230" y="191" text-anchor="middle" fill="#97b1c5" font-size="12" font-weight="650">SMD • náhled potisku</text>
+   <svg class="smd-graphic" viewBox="0 0 460 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Jednoduchý náhled SMD rezistoru s měnícím se kódem">
+    <rect x="57" y="31" width="346" height="108" rx="16" fill="#273541" stroke="#637b8b" stroke-width="2"/>
+    <rect x="57" y="31" width="58" height="108" rx="16" fill="#a5b5c1"/>
+    <rect x="345" y="31" width="58" height="108" rx="16" fill="#a5b5c1"/>
+    <path d="M115 32v106M345 32v106" stroke="#607582" stroke-width="2"/>
+    <text id="smd-marking" x="230" y="102" text-anchor="middle">472</text>
+    <text x="230" y="163" text-anchor="middle" fill="#a5b5c1" font-size="12" font-weight="600">SMD rezistor</text>
    </svg>
   </div>
   <div class="field smd-formats"><span>Typ označení</span>
@@ -286,7 +279,7 @@ body.picker-open{overflow:hidden}
 
 <section class="panel" id="divider" aria-label="Dělič napětí"><div class="card"><h2>Odporový dělič napětí</h2><p class="sub">Dva rezistory v sérii. Výstupní napětí se měří na spodním R₂.</p><div class="fields three"><label class="field"><span>Vstupní napětí</span><div class="control"><input id="du" type="text" inputmode="decimal" value="12"><span class="unit">V</span></div></label><label class="field"><span>Horní R₁</span><div class="control"><input id="dr1" type="text" inputmode="decimal" value="1000"><span class="unit">Ω</span></div></label><label class="field"><span>Spodní R₂</span><div class="control"><input id="dr2" type="text" inputmode="decimal" value="1000"><span class="unit">Ω</span></div></label></div></div><div class="card"><div class="result-label">Výsledek</div><div id="divider-result" class="result-grid" aria-live="polite"></div><div class="formula"><code>Uout = Uin × R₂ / (R₁ + R₂)</code></div><p class="helper">Platí pro nezatížený výstup; připojená zátěž může výsledek změnit.</p></div></section>
  <section class="panel" id="energy" aria-label="Spotřeba elektřiny"><div class="card"><h2>Spotřeba a cena elektřiny</h2><p class="sub">Spočítej spotřebu zařízení za vybrané období a orientační cenu.</p><div class="fields"><label class="field"><span>Příkon zařízení</span><div class="control"><input id="ep" type="text" inputmode="decimal" value="100"><span class="unit">W</span></div></label><label class="field"><span>Hodin denně</span><div class="control"><input id="eh" type="text" inputmode="decimal" value="5"><span class="unit">h</span></div></label><label class="field"><span>Počet dní</span><div class="control"><input id="ed" type="text" inputmode="decimal" value="30"><span class="unit">dní</span></div></label><label class="field"><span>Cena za 1 kWh</span><div class="control"><input id="ec" type="text" inputmode="decimal" value="6"><span class="unit">Kč</span></div></label></div></div><div class="card"><div class="result-label">Výsledná spotřeba</div><div id="energy-result" class="result-grid" aria-live="polite"></div><p class="helper">Cena je orientační: vypočítaná spotřeba × zadaná cena za kWh. Nezahrnuje samostatně stálé měsíční poplatky.</p></div></section>
- <footer class="footer">🐐 Veselá kozenka · v2.1</footer>
+ <footer class="footer">🐐 Veselá kozenka · v2.1.1</footer>
 </main>
 <div class="picker-overlay" id="picker-overlay" hidden>
  <div class="picker-dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
