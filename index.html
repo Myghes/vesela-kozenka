@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a1326">
-<meta name="description" content="Elektrotechnická kalkulačka Veselá kozenka – Ohmův zákon, rezistory, barevné proužky, SMD kódy, baterie, vodiče, transformátory, dělič napětí a spotřeba elektřiny.">
-<title>Elektrotechnická kalkulačka Veselá kozenka · v2.3</title>
+<meta name="description" content="Elektrotechnická kalkulačka Veselá kozenka – Ohmův zákon, rezistory, barevné proužky, SMD kódy, baterie, vodiče, transformátory, blikání LED, dělič napětí a spotřeba elektřiny.">
+<title>Elektrotechnická kalkulačka Veselá kozenka · v2.4</title>
 <link rel="icon" type="image/png" sizes="48x48" href="./favicon-48.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -161,6 +161,19 @@ body.picker-open{overflow:hidden}
 .circuit-mini .mini-copy strong{display:block;color:#f1f6ff;font-size:14px}
 @media(max-width:400px){.calc-hint{padding:10px 11px}.circuit-mini{padding:10px 11px;gap:10px}.circuit-mini .mini-symbol{font-size:23px}}
 @media(max-width:440px){.ohm-known-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.ohm-known-fields>.field:last-child{grid-column:1/-1}}
+
+/* NE555 · výpočet blikání LED · v2.4 */
+.blink-schematic{border:1px solid #35516b;border-radius:14px;background:#102039;padding:12px;margin:0 0 17px;overflow-x:auto}
+.blink-schematic svg{display:block;width:100%;height:auto;min-width:390px;max-width:610px;margin:0 auto}
+.blink-schematic .bl-wire{stroke:#83cbd0;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.blink-schematic .bl-part{fill:#193447;stroke:#8cd9d9;stroke-width:2}
+.blink-schematic .bl-pin{font:600 11px system-ui,sans-serif;fill:#b2c9dd}
+.blink-schematic .bl-label{font:700 13px system-ui,sans-serif;fill:#e3f4f6}
+.blink-schematic .bl-value{font:600 11px system-ui,sans-serif;fill:#66dec6}
+.blink-schematic .bl-dot{fill:#73e4d1}
+.blink-info{font-size:12px;line-height:1.6;color:#bdd1e2;margin:12px 0 0}
+.blink-info strong{color:#73e4d1}
+.blink-schematic small{display:block;color:var(--muted);font-size:11px;margin:6px 0 0}
 </style>
 </head>
 <body>
@@ -181,6 +194,7 @@ body.picker-open{overflow:hidden}
       <option value="battery">🔋 Výdrž baterie</option>
       <option value="wire">📏 Odpor vodiče podle délky</option>
       <option value="transformer">🧲 Převod závitů transformátoru</option>
+      <option value="led-blink">💡 Blikání LED (NE555)</option>
     </select>
   </label>
 </nav>
@@ -384,7 +398,69 @@ body.picker-open{overflow:hidden}
  <div class="formula"><code>N₂ = N₁ × U₂ / U₁</code> &nbsp;·&nbsp; <code>N ≈ U / (4,44 × f × B × S)</code> <span style="color:var(--muted)">(S v m²)</span></div></div>
 </section>
 
- <footer class="footer">🐐 Veselá kozenka · v2.3</footer>
+
+<section class="panel" id="led-blink" aria-label="Blikání LED s časovačem NE555">
+ <div class="card">
+  <h2>Blikání LED – časovač NE555</h2>
+  <p class="sub">Zadej, kolikrát má LED bliknout za sekundu. Podle dvou rezistorů spočítám potřebný kondenzátor a doporučím nejbližší běžnou hodnotu.</p>
+  <div class="blink-schematic">
+   <svg viewBox="0 0 610 324" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Zjednodušené schéma NE555: RA mezi napájením a pinem 7, RB mezi pinem 7 a piny 2 a 6, kondenzátor z pinů 2 a 6 do země. Výstup na pinu 3 ovládá LED přes ochranný rezistor.">
+    <text x="24" y="23" class="bl-label">+5 V DC</text>
+    <path class="bl-wire" d="M80 31 H325 M80 31 V70 M275 31 V80 M325 31 V80"/>
+    <rect x="70" y="70" width="20" height="34" rx="3" class="bl-part"/>
+    <path class="bl-wire" d="M80 104 V148 H230 M80 148 V180"/>
+    <circle cx="80" cy="148" r="4" class="bl-dot"/>
+    <rect x="70" y="180" width="20" height="33" rx="3" class="bl-part"/>
+    <path class="bl-wire" d="M80 213 V242 H230 M80 242 V258"/>
+    <circle cx="80" cy="242" r="4" class="bl-dot"/>
+    <path class="bl-wire" d="M61 258 H99 M61 271 H99 M80 271 V293"/>
+    <path class="bl-wire" d="M65 293 H95 M70 299 H90 M75 305 H85"/>
+    <text x="115" y="84" class="bl-label">R_A</text><text id="blink-ra-label" x="155" y="84" class="bl-value">10 kΩ</text>
+    <text x="115" y="192" class="bl-label">R_B</text><text id="blink-rb-label" x="155" y="192" class="bl-value">68 kΩ</text>
+    <text x="115" y="259" class="bl-label">C</text><text id="blink-cap-label" x="137" y="259" class="bl-value">10 µF</text>
+    <rect x="230" y="80" width="140" height="186" rx="13" fill="#213548" stroke="#6d9faf" stroke-width="2"/>
+    <text x="300" y="146" text-anchor="middle" fill="#e8f8fa" font-size="22" font-weight="800">NE555</text>
+    <text x="300" y="169" text-anchor="middle" fill="#aac7d5" font-size="12">Astabilní režim</text>
+    <text x="235" y="139" class="bl-pin">7</text>
+    <text x="235" y="235" class="bl-pin">2, 6</text>
+    <text x="266" y="96" class="bl-pin">8</text><text x="319" y="96" class="bl-pin">4</text>
+    <path class="bl-wire" d="M300 266 V293"/>
+    <path class="bl-wire" d="M285 293 H315 M290 299 H310 M295 305 H305"/>
+    <text x="309" y="279" class="bl-pin">1</text>
+    <path class="bl-wire" d="M370 176 H412"/>
+    <text x="373" y="164" class="bl-pin">3</text>
+    <rect x="412" y="165" width="39" height="22" rx="3" class="bl-part" transform="translate(0 -11)"/>
+    <path class="bl-wire" d="M451 176 H479"/>
+    <circle cx="495" cy="176" r="16" fill="#123d3c" stroke="#56e4bc" stroke-width="2"/>
+    <circle cx="495" cy="176" r="7" fill="#50e3c2"/>
+    <path class="bl-wire" d="M511 176 H552 V293"/>
+    <path class="bl-wire" d="M537 293 H567 M542 299 H562 M547 305 H557"/>
+    <text x="414" y="148" class="bl-pin">470 Ω</text>
+    <text x="479" y="147" class="bl-label">LED</text>
+    <text x="395" y="219" class="bl-pin">Pin 3 → rezistor →</text>
+    <text x="395" y="234" class="bl-pin">LED → GND</text>
+   </svg>
+   <small>Zjednodušené orientační zapojení při 5 V. Pin 5: doporučených 10 nF k GND; mezi piny 8 a 1: blokovací kondenzátor 100 nF.</small>
+  </div>
+  <div class="field select-row"><span>Kolikrát má LED bliknout za sekundu?</span>
+   <div class="control"><input id="blink-frequency" type="text" inputmode="decimal" value="1" placeholder="Např. 1"><span class="unit">Hz</span></div>
+  </div>
+  <div class="fields">
+   <label class="field"><span>Rezistor R_A</span><div class="control"><input id="blink-ra" type="text" inputmode="decimal" value="10"><span class="unit">kΩ</span></div></label>
+   <label class="field"><span>Rezistor R_B</span><div class="control"><input id="blink-rb" type="text" inputmode="decimal" value="68"><span class="unit">kΩ</span></div></label>
+  </div>
+  <p class="blink-info"><strong>Co znamená 1 Hz?</strong> Jeden celý cyklus LED (zapnutí i vypnutí) za sekundu. Rezistory můžeš změnit; bez jejich hodnot nelze určit jedinou správnou kapacitu.</p>
+ </div>
+ <div class="card">
+  <div class="result-label">Vhodný kondenzátor</div>
+  <div id="blink-result" class="result-grid" aria-live="polite"></div>
+  <p id="blink-note" class="blink-info" aria-live="polite"></p>
+  <div class="formula"><code>C ≈ 1 / [0,693 × f × (R_A + 2R_B)]</code></div>
+  <p class="helper">Přibližný výpočet pro běžný NE555 v astabilním zapojení. Frekvenci ovlivňuje tolerance rezistorů a kondenzátoru; elektrolytický kondenzátor připoj kladným pólem k uzlu pinů 2/6 a záporným ke GND. Nepřipojuj LED bez omezovacího rezistoru.</p>
+ </div>
+</section>
+
+ <footer class="footer">🐐 Veselá kozenka · v2.4</footer>
 </main>
 <div class="picker-overlay" id="picker-overlay" hidden>
  <div class="picker-dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
@@ -405,10 +481,10 @@ function fail(id,message){const el=document.createElement('p');el.className='err
 const labels={U:['Napětí U','V'],I:['Proud I','A'],R:['Odpor R','Ω'],P:['Výkon P','W']};
 const defaults={U:12,I:2,R:6,P:24};
 const ohmState={...defaults},ohmFactors={U:1,I:1,R:1,P:1};
-const unitInputs={"ohm-input-1":'I',"ohm-input-2":'R',"ohm-input-3":'P',r1:'R',r2:'R',r3:'R',du:'U',dr1:'R',dr2:'R',ep:'P',c1:'C',c2:'C',c3:'C',l1:'L',l2:'L',l3:'L'};
-const unitCalculators={'ohm-input-1':()=>calcOhm(),'ohm-input-2':()=>calcOhm(),'ohm-input-3':()=>calcOhm(),r1:()=>calcResistors(),r2:()=>calcResistors(),r3:()=>calcResistors(),du:()=>calcDivider(),dr1:()=>calcDivider(),dr2:()=>calcDivider(),ep:()=>calcEnergy(),c1:()=>calcReactive('capacitors'),c2:()=>calcReactive('capacitors'),c3:()=>calcReactive('capacitors'),l1:()=>calcReactive('inductors'),l2:()=>calcReactive('inductors'),l3:()=>calcReactive('inductors')};
+const unitInputs={"ohm-input-1":'I',"ohm-input-2":'R',"ohm-input-3":'P',"blink-ra":'R',"blink-rb":'R',r1:'R',r2:'R',r3:'R',du:'U',dr1:'R',dr2:'R',ep:'P',c1:'C',c2:'C',c3:'C',l1:'L',l2:'L',l3:'L'};
+const unitCalculators={'ohm-input-1':()=>calcOhm(),'ohm-input-2':()=>calcOhm(),'ohm-input-3':()=>calcOhm(),'blink-ra':()=>calcBlink(),'blink-rb':()=>calcBlink(),r1:()=>calcResistors(),r2:()=>calcResistors(),r3:()=>calcResistors(),du:()=>calcDivider(),dr1:()=>calcDivider(),dr2:()=>calcDivider(),ep:()=>calcEnergy(),c1:()=>calcReactive('capacitors'),c2:()=>calcReactive('capacitors'),c3:()=>calcReactive('capacitors'),l1:()=>calcReactive('inductors'),l2:()=>calcReactive('inductors'),l3:()=>calcReactive('inductors')};
 function editableNumber(value){return String(Number(value.toPrecision(12)))}
-const inputDefaultUnits={c1:1e-9,c2:1e-9,c3:1e-9,l1:1e-3,l2:1e-3,l3:1e-3};
+const inputDefaultUnits={"blink-ra":1000,"blink-rb":1000,c1:1e-9,c2:1e-9,c3:1e-9,l1:1e-3,l2:1e-3,l3:1e-3};
 function assignUnitOptions(select,key,factor=1){
  select.replaceChildren();
  for(const [name,value] of units[key]){const option=document.createElement('option');option.textContent=name;option.value=String(value);select.append(option)}
@@ -982,6 +1058,67 @@ function initNewCalculators(){
  calcBattery();calcWire();calcTransformer();
 }
 
+
+/* Blikání LED, NE555 astabilní režim (přesnější ln(2) místo zaokrouhleného 0,693). */
+function blinkRequiredCap(frequency,ra,rb){
+ return 1/(Math.LN2*frequency*(ra+2*rb));
+}
+function blinkTiming(ra,rb,cap){
+ const high=Math.LN2*(ra+rb)*cap,low=Math.LN2*rb*cap;
+ return {frequency:1/(high+low),period:high+low,high,low,highPercent:high/(high+low)*100};
+}
+function blinkNearestE12(cap){
+ const series=[1,1.2,1.5,1.8,2.2,2.7,3.3,3.9,4.7,5.6,6.8,8.2];
+ const base=Math.floor(Math.log10(cap));let best=NaN,diff=Infinity;
+ for(let exponent=base-1;exponent<=base+1;exponent++){
+  for(const significant of series){
+   const candidate=significant*10**exponent;
+   const distance=Math.abs(Math.log(candidate/cap));
+   if(distance<diff){diff=distance;best=candidate}
+  }
+ }
+ return best;
+}
+function blinkCapText(cap){
+ if(!Number.isFinite(cap)||cap<=0)return '—';
+ if(cap>=1e-3)return number(cap*1e3)+' mF';
+ if(cap>=1e-6)return number(cap*1e6)+' µF';
+ if(cap>=1e-9)return number(cap*1e9)+' nF';
+ return number(cap*1e12)+' pF';
+}
+function calcBlink(){
+ const f=parse($('blink-frequency').value),ra=siInput('blink-ra'),rb=siInput('blink-rb');
+ if(![f,ra,rb].every(Number.isFinite)||f<0.01||f>100||ra<1000||rb<1000||ra>1e6||rb>1e6){
+  fail('blink-result','Zadej frekvenci od 0,01 do 100 Hz a rezistory R_A, R_B v rozsahu 1 kΩ až 1 MΩ.');
+  $('blink-note').textContent='Výpočet potřebuje známou frekvenci a oba rezistory.';
+  return;
+ }
+ const ideal=blinkRequiredCap(f,ra,rb),standard=blinkNearestE12(ideal),timing=blinkTiming(ra,rb,standard);
+ if(![ideal,standard,timing.frequency,timing.period,timing.high,timing.low].every(Number.isFinite)||ideal<=0||standard<=0){
+  fail('blink-result','Zadané hodnoty jsou mimo rozsah výpočtu.');
+  return;
+ }
+ show('blink-result',[
+  metric('Doporučený kondenzátor (E12)',blinkCapText(standard),true),
+  metric('Vypočtená kapacita',blinkCapText(ideal)),
+  metric('Skutečná frekvence s E12',number(timing.frequency)+' Hz',true),
+  metric('Jeden cyklus',number(timing.period)+' s'),
+  metric('LED svítí',number(timing.high)+' s'),
+  metric('LED nesvítí',number(timing.low)+' s'),
+  metric('Poměr zapnuto',number(timing.highPercent)+' %',false,true)
+ ]);
+ $('blink-ra-label').textContent=pretty(ra,'R');
+ $('blink-rb-label').textContent=pretty(rb,'R');
+ $('blink-cap-label').textContent=blinkCapText(standard);
+ const deviation=Math.abs(timing.frequency/f-1)*100;
+ $('blink-note').textContent='Při použití '+blinkCapText(standard)+' vychází přibližně '+number(timing.frequency)+' bliknutí za sekundu (odchylka '+number(deviation)+' % od cíle). Jde o teoretický odhad; běžný elektrolytický kondenzátor může mít výraznou toleranci.';
+}
+function initBlink(){
+ $('blink-frequency').addEventListener('input',calcBlink);
+ for(const id of ['blink-ra','blink-rb'])$(id).addEventListener('input',calcBlink);
+ calcBlink();
+}
+
 $('tool-picker').addEventListener('change',()=>{
  const selected=$('tool-picker').value;
  for(const panel of document.querySelectorAll('.panel'))panel.classList.toggle('active',panel.id===selected);
@@ -1076,6 +1213,7 @@ document.addEventListener('keydown',e=>{
 initCustomSelects();
 initSmd();
 initNewCalculators();
+initBlink();
 </script>
 <script>
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
