@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a1326">
 <meta name="description" content="Elektrotechnická kalkulačka Veselá kozenka – Ohmův zákon, rezistory, barevné proužky, SMD kódy, baterie, vodiče, transformátory, dělič napětí a spotřeba elektřiny.">
-<title>Elektrotechnická kalkulačka Veselá kozenka · v2.2</title>
+<title>Elektrotechnická kalkulačka Veselá kozenka · v2.3</title>
 <link rel="icon" type="image/png" sizes="48x48" href="./favicon-48.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -160,6 +160,7 @@ body.picker-open{overflow:hidden}
 .circuit-mini .mini-copy{font-size:13px}
 .circuit-mini .mini-copy strong{display:block;color:#f1f6ff;font-size:14px}
 @media(max-width:400px){.calc-hint{padding:10px 11px}.circuit-mini{padding:10px 11px;gap:10px}.circuit-mini .mini-symbol{font-size:23px}}
+@media(max-width:440px){.ohm-known-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.ohm-known-fields>.field:last-child{grid-column:1/-1}}
 </style>
 </head>
 <body>
@@ -183,7 +184,27 @@ body.picker-open{overflow:hidden}
     </select>
   </label>
 </nav>
- <section class="panel active" id="ohm" aria-label="Ohmův zákon"><div class="card"><h2>Ohmův zákon a výkon</h2><p class="sub">Zadej dvě známé veličiny a vyber jejich jednotky. Zbývající dopočítám automaticky.</p><div class="field select-row"><span>Co znáš?</span><select id="pair"><option value="UI">Napětí U + proud I</option><option value="UR">Napětí U + odpor R</option><option value="IR">Proud I + odpor R</option><option value="UP">Napětí U + výkon P</option><option value="IP">Proud I + výkon P</option><option value="RP">Odpor R + výkon P</option></select></div><div class="fields"><label class="field"><span id="ohm-label-1">Napětí U</span><div class="control"><input id="ohm-input-1" type="text" inputmode="decimal" value="12" aria-labelledby="ohm-label-1"><span class="unit" id="ohm-unit-1">V</span></div></label><label class="field"><span id="ohm-label-2">Proud I</span><div class="control"><input id="ohm-input-2" type="text" inputmode="decimal" value="2" aria-labelledby="ohm-label-2"><span class="unit" id="ohm-unit-2">A</span></div></label></div></div><div class="card"><div class="result-label">Vypočítané hodnoty</div><div id="ohm-result" class="result-grid" aria-live="polite"></div><div class="formula">Základní vztahy: <code>U = R × I</code> &nbsp;·&nbsp; <code>P = U × I</code></div></div></section>
+ <section class="panel active" id="ohm" aria-label="Ohmův zákon">
+ <div class="card">
+  <h2>Ohmův zákon a výkon</h2>
+  <p class="sub">Vyber veličinu, kterou chceš vypočítat. Ze zbývajících tří zadej libovolné dvě známé hodnoty a jejich jednotky. Třetí nech prázdnou.</p>
+  <div class="field select-row"><span>Co chceš vypočítat?</span>
+   <select id="ohm-target">
+    <option value="U" selected>Napětí U</option>
+    <option value="I">Proud I</option>
+    <option value="R">Odpor R</option>
+    <option value="P">Výkon P</option>
+   </select>
+  </div>
+  <div class="fields ohm-known-fields">
+   <label class="field"><span id="ohm-label-1">Proud I</span><div class="control"><input id="ohm-input-1" type="text" inputmode="decimal" value="2" aria-labelledby="ohm-label-1" autocomplete="off"><span class="unit">A</span></div></label>
+   <label class="field"><span id="ohm-label-2">Odpor R</span><div class="control"><input id="ohm-input-2" type="text" inputmode="decimal" value="6" aria-labelledby="ohm-label-2" autocomplete="off"><span class="unit">Ω</span></div></label>
+   <label class="field"><span id="ohm-label-3">Výkon P (nepovinné)</span><div class="control"><input id="ohm-input-3" type="text" inputmode="decimal" placeholder="Volitelné" aria-labelledby="ohm-label-3" autocomplete="off"><span class="unit">W</span></div></label>
+  </div>
+  <p class="helper" id="ohm-hint">Vyplň přesně dvě známé veličiny. Třetí vstup ponech prázdný.</p>
+ </div>
+ <div class="card"><div class="result-label">Vypočítané hodnoty</div><div id="ohm-result" class="result-grid" aria-live="polite"></div><div class="formula">Základní vztahy: <code>U = R × I</code> &nbsp;·&nbsp; <code>P = U × I</code></div></div>
+</section>
  <section class="panel" id="resistors" aria-label="Skládání rezistoru"><div class="card"><h2>Sériové a paralelní zapojení</h2><p class="sub">Zadej hodnoty až tří rezistorů. U každého můžeš zvolit vlastní jednotku.</p><div class="fields three"><label class="field"><span>Rezistor R₁</span><div class="control"><input id="r1" type="text" inputmode="decimal" value="100"><span class="unit">Ω</span></div></label><label class="field"><span>Rezistor R₂</span><div class="control"><input id="r2" type="text" inputmode="decimal" value="220"><span class="unit">Ω</span></div></label><label class="field"><span>Rezistor R₃</span><div class="control"><input id="r3" type="text" inputmode="decimal" placeholder="Volitelné"><span class="unit">Ω</span></div></label></div></div><div class="card"><div class="result-label">Výsledný odpor</div><div id="resistors-result" class="result-grid" aria-live="polite"></div><p class="helper">Sériově se odpory sčítají. Paralelně platí 1/R = 1/R₁ + 1/R₂ + …</p></div></section>
  
 <section id="capacitors" class="panel" aria-label="Skládání kondenzátorů">
@@ -363,7 +384,7 @@ body.picker-open{overflow:hidden}
  <div class="formula"><code>N₂ = N₁ × U₂ / U₁</code> &nbsp;·&nbsp; <code>N ≈ U / (4,44 × f × B × S)</code> <span style="color:var(--muted)">(S v m²)</span></div></div>
 </section>
 
- <footer class="footer">🐐 Veselá kozenka · v2.2</footer>
+ <footer class="footer">🐐 Veselá kozenka · v2.3</footer>
 </main>
 <div class="picker-overlay" id="picker-overlay" hidden>
  <div class="picker-dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
@@ -384,8 +405,8 @@ function fail(id,message){const el=document.createElement('p');el.className='err
 const labels={U:['Napětí U','V'],I:['Proud I','A'],R:['Odpor R','Ω'],P:['Výkon P','W']};
 const defaults={U:12,I:2,R:6,P:24};
 const ohmState={...defaults},ohmFactors={U:1,I:1,R:1,P:1};
-const unitInputs={"ohm-input-1":'U',"ohm-input-2":'I',r1:'R',r2:'R',r3:'R',du:'U',dr1:'R',dr2:'R',ep:'P',c1:'C',c2:'C',c3:'C',l1:'L',l2:'L',l3:'L'};
-const unitCalculators={'ohm-input-1':()=>calcOhm(),'ohm-input-2':()=>calcOhm(),r1:()=>calcResistors(),r2:()=>calcResistors(),r3:()=>calcResistors(),du:()=>calcDivider(),dr1:()=>calcDivider(),dr2:()=>calcDivider(),ep:()=>calcEnergy(),c1:()=>calcReactive('capacitors'),c2:()=>calcReactive('capacitors'),c3:()=>calcReactive('capacitors'),l1:()=>calcReactive('inductors'),l2:()=>calcReactive('inductors'),l3:()=>calcReactive('inductors')};
+const unitInputs={"ohm-input-1":'I',"ohm-input-2":'R',"ohm-input-3":'P',r1:'R',r2:'R',r3:'R',du:'U',dr1:'R',dr2:'R',ep:'P',c1:'C',c2:'C',c3:'C',l1:'L',l2:'L',l3:'L'};
+const unitCalculators={'ohm-input-1':()=>calcOhm(),'ohm-input-2':()=>calcOhm(),'ohm-input-3':()=>calcOhm(),r1:()=>calcResistors(),r2:()=>calcResistors(),r3:()=>calcResistors(),du:()=>calcDivider(),dr1:()=>calcDivider(),dr2:()=>calcDivider(),ep:()=>calcEnergy(),c1:()=>calcReactive('capacitors'),c2:()=>calcReactive('capacitors'),c3:()=>calcReactive('capacitors'),l1:()=>calcReactive('inductors'),l2:()=>calcReactive('inductors'),l3:()=>calcReactive('inductors')};
 function editableNumber(value){return String(Number(value.toPrecision(12)))}
 const inputDefaultUnits={c1:1e-9,c2:1e-9,c3:1e-9,l1:1e-3,l2:1e-3,l3:1e-3};
 function assignUnitOptions(select,key,factor=1){
@@ -417,25 +438,58 @@ function setupInputUnits(){
  }
 }
 function siInput(id){return parse($(id).value)*Number($(id+'-unit-choice').value)}
-function updatePair(){
- const pair=$('pair').value;
- for(let i=0;i<2;i++){
-  const key=pair[i],id='ohm-input-'+(i+1);
-  $('ohm-label-'+(i+1)).textContent=labels[key][0];
-  assignUnitOptions($(id+'-unit-choice'),key,ohmFactors[key]);
-  $(id).value=editableNumber(ohmState[key]/ohmFactors[key]);
+
+const preferredKnown={U:['I','R'],I:['U','R'],R:['U','I'],P:['U','I']};
+const ohmKeys=['U','I','R','P'];
+const ohmInputKeys=['I','R','P'];
+function solveOhmPair(pair,a,b){
+ let U,I,R,P;
+ switch(pair){
+  case 'UI':U=a;I=b;R=U/I;P=U*I;break;
+  case 'UR':U=a;R=b;I=U/R;P=U*I;break;
+  case 'UP':U=a;P=b;I=P/U;R=U/I;break;
+  case 'IR':I=a;R=b;U=I*R;P=U*I;break;
+  case 'IP':I=a;P=b;U=P/I;R=U/I;break;
+  case 'RP':R=a;P=b;I=Math.sqrt(P/R);U=I*R;break;
+  default:return null;
  }
+ if(![U,I,R,P].every(v=>Number.isFinite(v)&&v>0))return null;
+ return {U,I,R,P};
+}
+function updateOhmTarget(){
+ const target=$('ohm-target').value;
+ const known=ohmKeys.filter(key=>key!==target);
+ const preferred=preferredKnown[target];
+ known.forEach((key,index)=>{
+  const id='ohm-input-'+(index+1);
+  const optional=!preferred.includes(key);
+  ohmInputKeys[index]=key;
+  $('ohm-label-'+(index+1)).textContent=labels[key][0]+(optional?' (nepovinné)':'');
+  assignUnitOptions($(id+'-unit-choice'),key,ohmFactors[key]);
+  $(id).value=optional?'':editableNumber(ohmState[key]/ohmFactors[key]);
+  $(id).placeholder=optional?'Volitelné':'Zadej hodnotu';
+ });
+ $('ohm-hint').textContent='Požadovaný výsledek: '+labels[target][0]+'. Vyplň přesně dvě známé veličiny a třetí nech prázdnou.';
  calcOhm();
 }
 function calcOhm(){
- const pair=$('pair').value;
- const a=siInput('ohm-input-1'),b=siInput('ohm-input-2');
- if(!Number.isFinite(a)||!Number.isFinite(b)||a<=0||b<=0){fail('ohm-result','Zadej dvě platná kladná čísla větší než nula.');return}
- let U,I,R,P;
- switch(pair){case 'UI':U=a;I=b;R=U/I;P=U*I;break;case 'UR':U=a;R=b;I=U/R;P=U*I;break;case 'IR':I=a;R=b;U=I*R;P=U*I;break;case 'UP':U=a;P=b;I=P/U;R=U/I;break;case 'IP':I=a;P=b;U=P/I;R=U/I;break;case 'RP':R=a;P=b;I=Math.sqrt(P/R);U=I*R;break}
- if(![U,I,R,P].every(Number.isFinite)){fail('ohm-result','Hodnoty jsou mimo rozsah výpočtu.');return}
- Object.assign(ohmState,{U,I,R,P});
- show('ohm-result',[metric('Napětí U',pretty(U,'U'),true),metric('Proud I',pretty(I,'I')),metric('Odpor R',pretty(R,'R')),metric('Výkon P',pretty(P,'P'),true)]);
+ const target=$('ohm-target').value;
+ const known=ohmInputKeys.map((key,i)=>{
+  const id='ohm-input-'+(i+1);
+  return {key,value:$(id).value.trim()===''?null:siInput(id)};
+ }).filter(item=>item.value!==null);
+ if(known.length!==2){
+  fail('ohm-result',known.length<2?'Vyplň dvě známé veličiny.':'Jsou vyplněny tři veličiny. Jednu hodnotu smaž, aby zůstaly právě dvě.');
+  return;
+ }
+ if(known.some(item=>!Number.isFinite(item.value)||item.value<=0)){
+  fail('ohm-result','Zadej dvě platná kladná čísla větší než nula.');return;
+ }
+ const pair=known.map(item=>item.key).join('');
+ const solution=solveOhmPair(pair,known[0].value,known[1].value);
+ if(!solution){fail('ohm-result','Hodnoty jsou mimo podporovaný rozsah výpočtu.');return}
+ Object.assign(ohmState,solution);
+ show('ohm-result',ohmKeys.map(key=>metric(labels[key][0],pretty(solution[key],key),key===target)));
 }
 
 /* Schémata rezistorů: mezinárodní značka rezistoru (IEC), počet podle vyplněných polí. */
@@ -933,8 +987,8 @@ $('tool-picker').addEventListener('change',()=>{
  for(const panel of document.querySelectorAll('.panel'))panel.classList.toggle('active',panel.id===selected);
  window.scrollTo(0,0);
 });
-$('pair').addEventListener('change',updatePair);for(const id of ['ohm-input-1','ohm-input-2'])$(id).addEventListener('input',calcOhm);for(const id of ['r1','r2','r3'])$(id).addEventListener('input',calcResistors);for(const id of ['b1','b2','b3','b4','b5','b6'])$(id).addEventListener('change',()=>calcBands());$('band-count').addEventListener('change',updateBandCount);$('target-resistance').addEventListener('input',applyResistanceToBands);$('target-unit').addEventListener('change',applyResistanceToBands);for(const id of ['du','dr1','dr2'])$(id).addEventListener('input',calcDivider);for(const id of ['ep','eh','ed','ec'])$(id).addEventListener('input',calcEnergy);for(const id of ['c1','c2','c3'])$(id).addEventListener('input',()=>calcReactive('capacitors'));for(const id of ['l1','l2','l3'])$(id).addEventListener('input',()=>calcReactive('inductors'));
-setupInputUnits();updatePair();calcResistors();initBands();calcDivider();calcEnergy();calcReactive('capacitors');calcReactive('inductors');
+$('ohm-target').addEventListener('change',updateOhmTarget);for(const id of ['ohm-input-1','ohm-input-2','ohm-input-3'])$(id).addEventListener('input',calcOhm);for(const id of ['r1','r2','r3'])$(id).addEventListener('input',calcResistors);for(const id of ['b1','b2','b3','b4','b5','b6'])$(id).addEventListener('change',()=>calcBands());$('band-count').addEventListener('change',updateBandCount);$('target-resistance').addEventListener('input',applyResistanceToBands);$('target-unit').addEventListener('change',applyResistanceToBands);for(const id of ['du','dr1','dr2'])$(id).addEventListener('input',calcDivider);for(const id of ['ep','eh','ed','ec'])$(id).addEventListener('input',calcEnergy);for(const id of ['c1','c2','c3'])$(id).addEventListener('input',()=>calcReactive('capacitors'));for(const id of ['l1','l2','l3'])$(id).addEventListener('input',()=>calcReactive('inductors'));
+setupInputUnits();updateOhmTarget();calcResistors();initBands();calcDivider();calcEnergy();calcReactive('capacitors');calcReactive('inductors');
 
 // Custom offline-friendly modal selects (Android/iOS/desktop).
 const pickerOverlay=$('picker-overlay'),pickerTitle=$('picker-title'),pickerOptions=$('picker-options');
