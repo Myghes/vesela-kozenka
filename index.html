@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a1326">
 <meta name="description" content="Elektrotechnická kalkulačka Veselá kozenka – Ohmův zákon, rezistory, barevné proužky, SMD kódy, baterie, vodiče, transformátory, blikání LED, dělič napětí a spotřeba elektřiny.">
-<title>Elektrotechnická kalkulačka Veselá kozenka · v2.4</title>
+<title>Elektrotechnická kalkulačka Veselá kozenka · v2.4.1</title>
 <link rel="icon" type="image/png" sizes="48x48" href="./favicon-48.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -164,13 +164,15 @@ body.picker-open{overflow:hidden}
 
 /* NE555 · výpočet blikání LED · v2.4 */
 .blink-schematic{border:1px solid #35516b;border-radius:14px;background:#102039;padding:12px;margin:0 0 17px;overflow-x:auto}
-.blink-schematic svg{display:block;width:100%;height:auto;min-width:390px;max-width:610px;margin:0 auto}
+.blink-schematic svg{display:block;width:100%;height:auto;min-width:570px;max-width:790px;margin:0 auto}
 .blink-schematic .bl-wire{stroke:#83cbd0;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .blink-schematic .bl-part{fill:#193447;stroke:#8cd9d9;stroke-width:2}
 .blink-schematic .bl-pin{font:600 11px system-ui,sans-serif;fill:#b2c9dd}
 .blink-schematic .bl-label{font:700 13px system-ui,sans-serif;fill:#e3f4f6}
 .blink-schematic .bl-value{font:600 11px system-ui,sans-serif;fill:#66dec6}
 .blink-schematic .bl-dot{fill:#73e4d1}
+.blink-schematic .bl-diode{fill:none;stroke:#88dedc;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.blink-schematic .bl-caption{fill:#91b0c5;font:500 10px system-ui,sans-serif}
 .blink-info{font-size:12px;line-height:1.6;color:#bdd1e2;margin:12px 0 0}
 .blink-info strong{color:#73e4d1}
 .blink-schematic small{display:block;color:var(--muted);font-size:11px;margin:6px 0 0}
@@ -404,50 +406,78 @@ body.picker-open{overflow:hidden}
   <h2>Blikání LED – časovač NE555</h2>
   <p class="sub">Zadej, kolikrát má LED bliknout za sekundu. Podle dvou rezistorů spočítám potřebný kondenzátor a doporučím nejbližší běžnou hodnotu.</p>
   <div class="blink-schematic">
-   <svg viewBox="0 0 610 324" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Zjednodušené schéma NE555: RA mezi napájením a pinem 7, RB mezi pinem 7 a piny 2 a 6, kondenzátor z pinů 2 a 6 do země. Výstup na pinu 3 ovládá LED přes ochranný rezistor.">
-    <text x="24" y="23" class="bl-label">+5 V DC</text>
-    <path class="bl-wire" d="M80 31 H325 M80 31 V70 M275 31 V80 M325 31 V80"/>
-    <rect x="70" y="70" width="20" height="34" rx="3" class="bl-part"/>
-    <path class="bl-wire" d="M80 104 V148 H230 M80 148 V180"/>
-    <circle cx="80" cy="148" r="4" class="bl-dot"/>
-    <rect x="70" y="180" width="20" height="33" rx="3" class="bl-part"/>
-    <path class="bl-wire" d="M80 213 V242 H230 M80 242 V258"/>
-    <circle cx="80" cy="242" r="4" class="bl-dot"/>
-    <path class="bl-wire" d="M61 258 H99 M61 271 H99 M80 271 V293"/>
-    <path class="bl-wire" d="M65 293 H95 M70 299 H90 M75 305 H85"/>
-    <text x="115" y="84" class="bl-label">R_A</text><text id="blink-ra-label" x="155" y="84" class="bl-value">10 kΩ</text>
-    <text x="115" y="192" class="bl-label">R_B</text><text id="blink-rb-label" x="155" y="192" class="bl-value">68 kΩ</text>
-    <text x="115" y="259" class="bl-label">C</text><text id="blink-cap-label" x="137" y="259" class="bl-value">10 µF</text>
-    <rect x="230" y="80" width="140" height="186" rx="13" fill="#213548" stroke="#6d9faf" stroke-width="2"/>
-    <text x="300" y="146" text-anchor="middle" fill="#e8f8fa" font-size="22" font-weight="800">NE555</text>
-    <text x="300" y="169" text-anchor="middle" fill="#aac7d5" font-size="12">Astabilní režim</text>
-    <text x="235" y="139" class="bl-pin">7</text>
-    <text x="235" y="235" class="bl-pin">2, 6</text>
-    <text x="266" y="96" class="bl-pin">8</text><text x="319" y="96" class="bl-pin">4</text>
-    <path class="bl-wire" d="M300 266 V293"/>
-    <path class="bl-wire" d="M285 293 H315 M290 299 H310 M295 305 H305"/>
-    <text x="309" y="279" class="bl-pin">1</text>
-    <path class="bl-wire" d="M370 176 H412"/>
-    <text x="373" y="164" class="bl-pin">3</text>
-    <rect x="412" y="165" width="39" height="22" rx="3" class="bl-part"/>
-    <path class="bl-wire" d="M451 176 H479"/>
-    <circle cx="495" cy="176" r="16" fill="#123d3c" stroke="#56e4bc" stroke-width="2"/>
-    <circle cx="495" cy="176" r="7" fill="#50e3c2"/>
-    <path class="bl-wire" d="M511 176 H552 V293"/>
-    <path class="bl-wire" d="M537 293 H567 M542 299 H562 M547 305 H557"/>
-    <text x="414" y="148" class="bl-pin">470 Ω</text>
-    <text x="479" y="147" class="bl-label">LED</text>
-    <text x="395" y="219" class="bl-pin">Pin 3 → rezistor →</text>
-    <text x="395" y="234" class="bl-pin">LED → GND</text>
+   <svg viewBox="0 0 790 435" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Funkční schéma astabilního časovače NE555. Od plus 5 voltů vede rezistor Ra k vývodu 7, rezistor Rb od vývodu 7 k vývodům 2 a 6. Z vývodů 2 a 6 vede časovací kondenzátor do země. Piny 8 a 4 jsou na plus 5 voltů, pin 1 na GND, pin 5 přes 10 nanofaradů na GND a z vývodu 3 jde sériový rezistor a LED do GND.">
+    <!-- Napájení +5 V, RESET (4), VCC (8) -->
+    <text x="33" y="29" class="bl-label">+5 V DC</text>
+    <path class="bl-wire" d="M105 42 H435 M105 42 V95 M360 42 V96 M435 42 V96"/>
+    <circle cx="105" cy="42" r="3.7" class="bl-dot"/>
+
+    <!-- R_a, uzel vybijeni: pin 7 DISCH -->
+    <rect x="92" y="95" width="26" height="39" rx="3" class="bl-part"/>
+    <path class="bl-wire" d="M105 134 V156 H298 M105 156 V187"/>
+    <circle cx="105" cy="156" r="4" class="bl-dot"/>
+    <text x="140" y="111" class="bl-label">R<tspan baseline-shift="sub" font-size="10">a</tspan></text>
+    <text id="blink-ra-label" x="176" y="111" class="bl-value">10 kΩ</text>
+
+    <!-- R_b, uzel TRIG (2) + THRES (6) -->
+    <rect x="92" y="187" width="26" height="42" rx="3" class="bl-part"/>
+    <path class="bl-wire" d="M105 229 V262 H298 M105 262 V311"/>
+    <circle cx="105" cy="262" r="4" class="bl-dot"/>
+    <text x="140" y="206" class="bl-label">R<tspan baseline-shift="sub" font-size="10">b</tspan></text>
+    <text id="blink-rb-label" x="176" y="206" class="bl-value">68 kΩ</text>
+
+    <!-- Casovaci kondenzator: niz nez puvodni verze, kladny pol u pinu 2/6 -->
+    <path class="bl-wire" d="M80 311 H130 M80 329 H130 M105 329 V387"/>
+    <text x="69" y="306" class="bl-value" font-size="12">+</text>
+    <text x="140" y="322" class="bl-label">C</text>
+    <text id="blink-cap-label" x="164" y="322" class="bl-value">10 µF</text>
+    <path class="bl-wire" d="M84 387 H126 M90 397 H120 M96 407 H114"/>
+
+    <!-- Funkcni symbol NE555 s cisly odpovidajicimi fyzickemu vyvodovemu zapojeni -->
+    <rect x="298" y="96" width="192" height="227" rx="13" fill="#20364a" stroke="#719eaf" stroke-width="2"/>
+    <text x="394" y="199" text-anchor="middle" fill="#e9f7f8" font-size="28" font-weight="800">NE555</text>
+    <text x="394" y="220" text-anchor="middle" fill="#a7cada" font-size="12">Astabilní režim</text>
+    <text x="306" y="149" class="bl-pin">7 · DISCH</text>
+    <text x="306" y="254" class="bl-pin">2 · TRIG / 6 · THRES</text>
+    <text x="333" y="115" class="bl-pin">8 · VCC</text>
+    <text x="416" y="115" class="bl-pin">4 · RESET</text>
+    <text x="472" y="181" class="bl-pin">3</text>
+    <text x="335" y="309" class="bl-pin">1 · GND</text>
+    <text x="424" y="309" class="bl-pin">5 · CONT</text>
+
+    <!-- Pin 1 zeme -->
+    <path class="bl-wire" d="M361 323 V387 M340 387 H382 M346 397 H376 M352 407 H370"/>
+
+    <!-- Pin 5 CONT pres kondenzator 10 nF na zem -->
+    <path class="bl-wire" d="M443 323 V348 M422 348 H464 M422 361 H464 M443 361 V387 M422 387 H464 M428 397 H458 M434 407 H452"/>
+    <text x="474" y="359" class="bl-value">10 nF</text>
+
+    <!-- Pin 3 OUT, omezovaci rezistor 470 ohmu -->
+    <path class="bl-wire" d="M490 188 H541"/>
+    <rect x="541" y="175" width="49" height="26" rx="3" class="bl-part"/>
+    <text x="546" y="165" class="bl-value">470 Ω</text>
+    <path class="bl-wire" d="M590 188 H621"/>
+
+    <!-- LED: normalni schematicka znacka diody se sipkami vyzarovaneho svetla -->
+    <path class="bl-diode" d="M621 167 L621 209 L657 188 Z"/>
+    <path class="bl-diode" d="M666 166 V210 M657 188 H666"/>
+    <path class="bl-wire" d="M666 188 H739 V387"/>
+    <path class="bl-diode" d="M636 163 L652 146 M647 146 L652 146 L652 151"/>
+    <path class="bl-diode" d="M655 162 L671 145 M666 145 L671 145 L671 150"/>
+    <text x="694" y="157" class="bl-label">LED</text>
+    <path class="bl-wire" d="M718 387 H760 M724 397 H754 M730 407 H748"/>
+
+    <!-- Legenda k cislum vyvodu -->
+    <text x="394" y="427" text-anchor="middle" class="bl-caption">Schéma podle funkcí pinů NE555 (nepředstavuje fyzický pohled shora na DIP-8).</text>
    </svg>
-   <small>Zjednodušené orientační zapojení při 5 V. Pin 5: doporučených 10 nF k GND; mezi piny 8 a 1: blokovací kondenzátor 100 nF.</small>
+   <small>Pro napájení 5 V. Pin 5 je přes 10 nF spojen s GND; mezi piny 8 a 1 patří také blokovací kondenzátor 100 nF co nejblíže k obvodu. LED má sériový rezistor 470 Ω.</small>
   </div>
   <div class="field select-row"><span>Kolikrát má LED bliknout za sekundu?</span>
    <div class="control"><input id="blink-frequency" type="text" inputmode="decimal" value="1" placeholder="Např. 1"><span class="unit">Hz</span></div>
   </div>
   <div class="fields">
-   <label class="field"><span>Rezistor R_A</span><div class="control"><input id="blink-ra" type="text" inputmode="decimal" value="10"><span class="unit">kΩ</span></div></label>
-   <label class="field"><span>Rezistor R_B</span><div class="control"><input id="blink-rb" type="text" inputmode="decimal" value="68"><span class="unit">kΩ</span></div></label>
+   <label class="field"><span>Rezistor R<sub>a</sub></span><div class="control"><input id="blink-ra" type="text" inputmode="decimal" value="10"><span class="unit">kΩ</span></div></label>
+   <label class="field"><span>Rezistor R<sub>b</sub></span><div class="control"><input id="blink-rb" type="text" inputmode="decimal" value="68"><span class="unit">kΩ</span></div></label>
   </div>
   <p class="blink-info"><strong>Co znamená 1 Hz?</strong> Jeden celý cyklus LED (zapnutí i vypnutí) za sekundu. Rezistory můžeš změnit; bez jejich hodnot nelze určit jedinou správnou kapacitu.</p>
  </div>
@@ -455,12 +485,12 @@ body.picker-open{overflow:hidden}
   <div class="result-label">Vhodný kondenzátor</div>
   <div id="blink-result" class="result-grid" aria-live="polite"></div>
   <p id="blink-note" class="blink-info" aria-live="polite"></p>
-  <div class="formula"><code>C ≈ 1 / [0,693 × f × (R_A + 2R_B)]</code></div>
+  <div class="formula"><code>C ≈ 1 / [0,693 × f × (R<sub>a</sub> + 2R<sub>b</sub>)]</code></div>
   <p class="helper">Přibližný výpočet pro běžný NE555 v astabilním zapojení. Frekvenci ovlivňuje tolerance rezistorů a kondenzátoru; elektrolytický kondenzátor připoj kladným pólem k uzlu pinů 2/6 a záporným ke GND. Nepřipojuj LED bez omezovacího rezistoru.</p>
  </div>
 </section>
 
- <footer class="footer">🐐 Veselá kozenka · v2.4</footer>
+ <footer class="footer">🐐 Veselá kozenka · v2.4.1</footer>
 </main>
 <div class="picker-overlay" id="picker-overlay" hidden>
  <div class="picker-dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
@@ -1089,7 +1119,7 @@ function blinkCapText(cap){
 function calcBlink(){
  const f=parse($('blink-frequency').value),ra=siInput('blink-ra'),rb=siInput('blink-rb');
  if(![f,ra,rb].every(Number.isFinite)||f<0.01||f>100||ra<1000||rb<1000||ra>1e6||rb>1e6){
-  fail('blink-result','Zadej frekvenci od 0,01 do 100 Hz a rezistory R_A, R_B v rozsahu 1 kΩ až 1 MΩ.');
+  fail('blink-result','Zadej frekvenci od 0,01 do 100 Hz a rezistory v rozsahu 1 kΩ až 1 MΩ.');
   $('blink-note').textContent='Výpočet potřebuje známou frekvenci a oba rezistory.';
   return;
  }
