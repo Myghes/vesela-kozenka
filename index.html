@@ -1066,13 +1066,12 @@ function renderResistorBuilder(){
   const description=document.createElement('p');description.className='res-builder-desc';
   description.textContent=block.type==='series'?'Rezistory zapojené za sebou – hodnoty se sčítají.':'Každý rezistor je samostatná větev mezi společnými uzly.';
   const toolbar=document.createElement('div');toolbar.className='res-builder-toolbar';
-  const hint=document.createElement('span');hint.className='res-builder-kicker';hint.textContent='POČET REZISTORŮ';
   const buttons=document.createElement('div');buttons.className='res-builder-toolbar-actions';
   buttons.append(
    resistorBuildButton('− Odebrat','','Odebrat rezistor z části '+(i+1),()=>modifyResistorBlock(block.id,-1),block.parts.length<=1),
    resistorBuildButton('+ Přidat','res-builder-add','Přidat rezistor do části '+(i+1),()=>modifyResistorBlock(block.id,1),block.parts.length>=resistorMaxPerSection)
   );
-  toolbar.append(hint,buttons);
+  toolbar.append(buttons);
   const rows=document.createElement('div');rows.className='res-builder-rows';
   block.parts.forEach((part,index)=>{rows.append(resistorBuildInput(block,index,resistorNumber,part));resistorNumber++;});
   const actions=document.createElement('div');actions.className='res-builder-block-actions';
