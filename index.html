@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a1326">
 <meta name="description" content="Elektrotechnická kalkulačka Veselá kozenka – Ohmův zákon, rezistory, barevné proužky, SMD kódy, keramické kondenzátory, baterie, vodiče, transformátory, blikání LED, dělič napětí a spotřeba elektřiny.">
-<title>Elektrotechnická kalkulačka Veselá kozenka · v3.3</title>
+<title>Elektrotechnická kalkulačka Veselá kozenka · v3.3.1</title>
 <link rel="icon" type="image/png" sizes="48x48" href="./favicon-48.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -782,7 +782,7 @@ body.picker-open{overflow:hidden}
  </div>
 </section>
 
- <footer class="footer">🐐 Veselá kozenka · v3.3</footer>
+ <footer class="footer">🐐 Veselá kozenka · v3.3.1</footer>
 </main>
 <div class="picker-overlay" id="picker-overlay" hidden>
  <div class="picker-dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
@@ -963,11 +963,9 @@ function ensureResistorView(){
  const diagram=$(kind+'-diagram');
  if(!diagram.clientWidth||!diagram.clientHeight)return;
  if(!resistorView.ready){
-  const {height}=resistorViewDimensions();
-  resistorView.scale=1;
-  resistorView.x=17;
-  resistorView.y=Math.max(12,(diagram.clientHeight-height)/2);
-  resistorView.ready=true;
+  // First opening: fit all rows, including the labels, into the viewport.
+  fitResistorView();
+  return;
  }
  applyResistorView();
 }
@@ -1100,8 +1098,11 @@ function reactiveDrawSvg(kind,blocks){
  const svg=$(kind+'-diagram-svg'),ns='http://www.w3.org/2000/svg';
  svg.replaceChildren();
  const maxBranches=Math.max(1,...blocks.filter(b=>b.type==='parallel').map(b=>b.values.length));
- const centerY=154+(maxBranches-1)*39;
- const height=Math.max(304,centerY+(maxBranches-1)*39+86);
+ // 112 px between branches leaves ample room for the component label and its value.
+ // The previous 78 px spacing made e.g. "L3" overlap the preceding "10 mH".
+ const rowGap=112;
+ const centerY=154+(maxBranches-1)*(rowGap/2);
+ const height=Math.max(304,centerY+(maxBranches-1)*(rowGap/2)+86);
  let cursor=68,serial=0,layouts=[];
  for(const b of blocks){
   const width=b.type==='series'?Math.max(164,54+b.values.length*112):258;
@@ -1139,8 +1140,8 @@ function reactiveDrawSvg(kind,blocks){
    add('path',{d:path.join(' '),class:cls});
    line(x+26,y,x+36,y);
   }
-  label(x,y-32,prefix+serial,'rb-label');
-  label(x,y+40,Number.isFinite(value)&&value>0?pretty(value,prefix):'?','rb-value');
+  label(x,y-33,prefix+serial,'rb-label');
+  label(x,y+39,Number.isFinite(value)&&value>0?pretty(value,prefix):'?','rb-value');
  };
  dot(24,centerY);label(24,centerY-16,'A','rb-terminal');
  let before=24;
@@ -1159,7 +1160,7 @@ function reactiveDrawSvg(kind,blocks){
    line(from,centerY,end,centerY);
   }else{
    const left=start+25,right=end-25,center=(left+right)/2;
-   const rows=block.values.map((_,j)=>centerY+(j-(block.values.length-1)/2)*78);
+   const rows=block.values.map((_,j)=>centerY+(j-(block.values.length-1)/2)*rowGap);
    line(start,centerY,left,centerY);
    line(left,rows[0],left,rows[rows.length-1]);
    line(right,rows[0],right,rows[rows.length-1]);
@@ -1177,7 +1178,7 @@ function reactiveDrawSvg(kind,blocks){
  const terminal=last+42;
  line(last,centerY,terminal,centerY);
  dot(terminal,centerY);label(terminal,centerY-16,'B','rb-terminal');
- const description=blocks.map((b,i)=>(i+1)+'. '+(b.type==='series'?'sériová':'paralelní')+' část ('+b.values.length+' rezistorů)').join(', ');
+ const description=blocks.map((b,i)=>(i+1)+'. '+(b.type==='series'?'sériová':'paralelní')+' část ('+b.values.length+' součástek)').join(', ');
  svg.setAttribute('aria-label','Obvod mezi A a B: '+description+'. Části jsou navzájem zapojené v sérii.');
  reactiveViews[kind]?.ensure();
 }
