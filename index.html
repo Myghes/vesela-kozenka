@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a1326">
 <meta name="description" content="Elektrotechnická kalkulačka Veselá kozenka – Ohmův zákon, rezistory, barevné proužky, SMD kódy, keramické kondenzátory, baterie, vodiče, transformátory, blikání LED, dělič napětí a spotřeba elektřiny.">
-<title>Elektrotechnická kalkulačka Veselá kozenka · v3.0</title>
+<title>Elektrotechnická kalkulačka Veselá kozenka · v3.1</title>
 <link rel="icon" type="image/png" sizes="48x48" href="./favicon-48.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -274,9 +274,19 @@ body.picker-open{overflow:hidden}
 .res-builder-new-block{margin-top:18px;padding:16px;border:1px dashed #4b7d80;border-radius:15px;background:#132b3d}
 .res-builder-new-actions{display:flex;flex-wrap:wrap;gap:10px}
 .res-builder-limit-hint{color:#92b2c5;margin:12px 0 0;font-size:11px;line-height:1.5}
-.res-builder-diagram{border:1px solid #416579;border-radius:15px;background:radial-gradient(ellipse at center,#183549,#0e1e31);overflow:auto;max-height:440px;scrollbar-color:#4a858a #102235;overscroll-behavior:contain;padding:5px}
+.res-view-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 11px}
+.res-view-hint{font-size:12px;color:#b0d6de;font-weight:650}
+.res-view-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.res-view-btn{border:1px solid #4b7b83;background:#163848;color:#cbfcf2;border-radius:9px;min-width:37px;height:36px;display:inline-flex;align-items:center;justify-content:center;padding:5px 10px;cursor:pointer;font-size:19px;font-weight:750}
+.res-view-btn:active{background:#245b5b}
+.res-view-btn:focus-visible{outline:2px solid #61e7ce;outline-offset:2px}
+.res-view-center{font-size:12px;min-width:0;background:#164b49;border-color:#3d988b;padding:5px 12px}
+.res-view-zoom{font-size:12px;text-align:center;min-width:51px;color:#c5e8e3;font-variant-numeric:tabular-nums}
+.res-builder-diagram{position:relative;border:1px solid #416579;border-radius:15px;background:radial-gradient(ellipse at center,#183549,#0e1e31);overflow:hidden;height:380px;max-height:none;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;overscroll-behavior:contain}
+.res-builder-diagram.dragging{cursor:grabbing}
 .res-builder-diagram:focus-visible{outline:2px solid #61e7ce;outline-offset:2px}
-.res-builder-diagram svg{display:block;max-width:none}
+.res-builder-diagram svg{position:absolute;top:0;left:0;display:block;max-width:none;transform-origin:0 0;pointer-events:none;will-change:transform}
+@media(max-width:600px){.res-builder-diagram{height:310px}.res-view-hint{font-size:11px}.res-view-toolbar{align-items:flex-start}.res-view-actions{width:100%;justify-content:flex-end}}
 .res-builder-diagram .rb-wire{fill:none;stroke:#8ce9da;stroke-width:3;stroke-linecap:round}
 .res-builder-diagram .rb-resistor{fill:#1c4152;stroke:#83edd9;stroke-width:2.2}
 .res-builder-diagram .rb-resistor.branch{fill:#47344b;stroke:#eab7ff}
@@ -360,10 +370,19 @@ body.picker-open{overflow:hidden}
  </div>
  <div class="card">
   <div class="result-label">Schéma zapojení</div>
-  <div class="res-builder-diagram" id="res-diagram" tabindex="0" role="region" aria-label="Posuvné schéma zapojení rezistorů">
+  <div class="res-view-toolbar" role="group" aria-label="Ovládání pohledu na schéma">
+   <span class="res-view-hint">✋ Chyť a táhni obrázek</span>
+   <div class="res-view-actions">
+    <button type="button" class="res-view-btn" id="res-zoom-out" aria-label="Oddálit schéma" title="Oddálit">−</button>
+    <span class="res-view-zoom" id="res-zoom-level" aria-live="off">100 %</span>
+    <button type="button" class="res-view-btn" id="res-zoom-in" aria-label="Přiblížit schéma" title="Přiblížit">+</button>
+    <button type="button" class="res-view-btn res-view-center" id="res-center" title="Zobrazit celý obvod na středu">◎ Vycentrovat</button>
+   </div>
+  </div>
+  <div class="res-builder-diagram" id="res-diagram" tabindex="0" role="region" aria-label="Schéma zapojení rezistorů. Tažením myši nebo prstem posouvej, tlačítky plus a minus přibližuj.">
    <svg id="res-diagram-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Obvod rezistorů"></svg>
   </div>
-  <p class="res-builder-diagram-help">Schéma se automaticky mění podle zvolených částí, pořadí a hodnot. Delší schéma lze posouvat.</p>
+  <p class="res-builder-diagram-help">Obrázek posouvej myší nebo prstem volně všemi směry. Dvojklikem nebo tlačítkem <strong>Vycentrovat</strong> zobrazíš celý obvod. Fungují i klávesy se šipkami, + a −.</p>
   <div class="result-label res-builder-result-heading">Výsledný odpor</div>
   <div id="resistors-result" class="result-grid" aria-live="polite"></div>
   <p class="helper">Každá část tvoří jeden blok, všechny bloky jsou mezi A a B zapojeny za sebou. Sériová část sčítá odpory, paralelní část počítá jejich společný odpor. Nejde zatím o libovolné vnořené propojování větví.</p>
@@ -733,7 +752,7 @@ body.picker-open{overflow:hidden}
  </div>
 </section>
 
- <footer class="footer">🐐 Veselá kozenka · v3.0</footer>
+ <footer class="footer">🐐 Veselá kozenka · v3.1</footer>
 </main>
 <div class="picker-overlay" id="picker-overlay" hidden>
  <div class="picker-dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
@@ -923,6 +942,119 @@ function resistorBuildOhms(part){return parse(part.value)*part.unit}
 function resistorBuildBlocks(){
  return resistorBuilder.blocks.map(block=>({type:block.type,values:block.parts.map(resistorBuildOhms)}));
 }
+
+/* v3.1: volné 2D posouvání a zoom schématu bez tradičních posuvníků. */
+const resistorView={x:0,y:0,scale:1,ready:false,drag:null};
+const resistorViewMinZoom=0.04,resistorViewMaxZoom=4;
+function resistorViewDimensions(){
+ const svg=$('res-diagram-svg');
+ return {
+  width:Number(svg.getAttribute('width'))||0,
+  height:Number(svg.getAttribute('height'))||0
+ };
+}
+function applyResistorView(){
+ const diagram=$('res-diagram');
+ if(!diagram.clientWidth||!diagram.clientHeight)return;
+ const svg=$('res-diagram-svg');
+ svg.style.transform='translate3d('+resistorView.x+'px,'+resistorView.y+'px,0) scale('+resistorView.scale+')';
+ $('res-zoom-level').textContent=Math.round(resistorView.scale*100)+' %';
+}
+function ensureResistorView(){
+ const diagram=$('res-diagram');
+ if(!diagram.clientWidth||!diagram.clientHeight)return;
+ if(!resistorView.ready){
+  const {height}=resistorViewDimensions();
+  resistorView.scale=1;
+  resistorView.x=17;
+  resistorView.y=Math.max(12,(diagram.clientHeight-height)/2);
+  resistorView.ready=true;
+ }
+ applyResistorView();
+}
+function fitResistorView(){
+ const diagram=$('res-diagram'),size=resistorViewDimensions();
+ if(!diagram.clientWidth||!diagram.clientHeight||!size.width||!size.height)return;
+ const padding=32;
+ resistorView.scale=Math.max(resistorViewMinZoom,Math.min(1.5,(diagram.clientWidth-padding)/size.width,(diagram.clientHeight-padding)/size.height));
+ resistorView.x=(diagram.clientWidth-size.width*resistorView.scale)/2;
+ resistorView.y=(diagram.clientHeight-size.height*resistorView.scale)/2;
+ resistorView.ready=true;
+ applyResistorView();
+}
+function zoomResistorView(factor,pointX,pointY){
+ const diagram=$('res-diagram');
+ if(!diagram.clientWidth||!diagram.clientHeight)return;
+ ensureResistorView();
+ const x=Number.isFinite(pointX)?pointX:diagram.clientWidth/2;
+ const y=Number.isFinite(pointY)?pointY:diagram.clientHeight/2;
+ const next=Math.max(resistorViewMinZoom,Math.min(resistorViewMaxZoom,resistorView.scale*factor));
+ const ratio=next/resistorView.scale;
+ resistorView.x=x-(x-resistorView.x)*ratio;
+ resistorView.y=y-(y-resistorView.y)*ratio;
+ resistorView.scale=next;
+ applyResistorView();
+}
+function initResistorView(){
+ const diagram=$('res-diagram');
+ $('res-zoom-in').addEventListener('click',()=>zoomResistorView(1.25));
+ $('res-zoom-out').addEventListener('click',()=>zoomResistorView(.8));
+ $('res-center').addEventListener('click',fitResistorView);
+ diagram.addEventListener('dblclick',event=>{event.preventDefault();fitResistorView();});
+ diagram.addEventListener('pointerdown',event=>{
+  if(event.pointerType==='mouse'&&event.button!==0)return;
+  if(resistorView.drag)return;
+  ensureResistorView();
+  resistorView.drag={id:event.pointerId,startX:event.clientX,startY:event.clientY,baseX:resistorView.x,baseY:resistorView.y};
+  diagram.classList.add('dragging');
+  try{diagram.setPointerCapture(event.pointerId)}catch(_){}
+  event.preventDefault();
+ });
+ diagram.addEventListener('pointermove',event=>{
+  const drag=resistorView.drag;
+  if(!drag||drag.id!==event.pointerId)return;
+  resistorView.x=drag.baseX+event.clientX-drag.startX;
+  resistorView.y=drag.baseY+event.clientY-drag.startY;
+  applyResistorView();
+  event.preventDefault();
+ });
+ const stopDrag=event=>{
+  const drag=resistorView.drag;
+  if(!drag||drag.id!==event.pointerId)return;
+  resistorView.drag=null;
+  diagram.classList.remove('dragging');
+  try{if(diagram.hasPointerCapture(event.pointerId))diagram.releasePointerCapture(event.pointerId)}catch(_){}
+ };
+ diagram.addEventListener('pointerup',stopDrag);
+ diagram.addEventListener('pointercancel',stopDrag);
+ diagram.addEventListener('lostpointercapture',stopDrag);
+ diagram.addEventListener('wheel',event=>{
+  if(!event.ctrlKey)return;
+  event.preventDefault();
+  const rect=diagram.getBoundingClientRect();
+  zoomResistorView(event.deltaY<0?1.15:1/1.15,event.clientX-rect.left,event.clientY-rect.top);
+ },{passive:false});
+ diagram.addEventListener('keydown',event=>{
+  if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){
+   const distance=50;
+   if(event.key==='ArrowLeft')resistorView.x+=distance;
+   if(event.key==='ArrowRight')resistorView.x-=distance;
+   if(event.key==='ArrowUp')resistorView.y+=distance;
+   if(event.key==='ArrowDown')resistorView.y-=distance;
+   event.preventDefault();
+   ensureResistorView();
+   applyResistorView();
+  }else if(event.key==='+'||event.key==='='){
+   event.preventDefault();zoomResistorView(1.25);
+  }else if(event.key==='-'||event.key==='_'){
+   event.preventDefault();zoomResistorView(.8);
+  }else if(event.key==='Home'||event.key==='0'){
+   event.preventDefault();fitResistorView();
+  }
+ });
+ window.addEventListener('resize',()=>{if(resistorView.ready)applyResistorView();});
+}
+
 function resistorBuildCircuitSvg(blocks){
  const svg=$('res-diagram-svg'),ns='http://www.w3.org/2000/svg';
  svg.replaceChildren();
@@ -991,6 +1123,7 @@ function resistorBuildCircuitSvg(blocks){
  dot(terminal,centerY);label(terminal,centerY-16,'B','rb-terminal');
  const description=blocks.map((b,i)=>(i+1)+'. '+(b.type==='series'?'sériová':'paralelní')+' část ('+b.values.length+' rezistorů)').join(', ');
  svg.setAttribute('aria-label','Obvod mezi A a B: '+description+'. Části jsou navzájem zapojené v sérii.');
+ ensureResistorView();
 }
 function calcResistors(){
  const blocks=resistorBuildBlocks();
@@ -1772,6 +1905,7 @@ function initBlink(){
 $('tool-picker').addEventListener('change',()=>{
  const selected=$('tool-picker').value;
  for(const panel of document.querySelectorAll('.panel'))panel.classList.toggle('active',panel.id===selected);
+ if(selected==='resistors')ensureResistorView();
  window.scrollTo(0,0);
 });
 $('ohm-target').addEventListener('change',updateOhmTarget);for(const id of ['ohm-input-1','ohm-input-2','ohm-input-3'])$(id).addEventListener('input',calcOhm);for(const id of ['b1','b2','b3','b4','b5','b6'])$(id).addEventListener('change',()=>calcBands());$('band-count').addEventListener('change',updateBandCount);$('target-resistance').addEventListener('input',applyResistanceToBands);$('target-unit').addEventListener('change',applyResistanceToBands);for(const id of ['du','dr1','dr2'])$(id).addEventListener('input',calcDivider);for(const id of ['ep','eh','ed','ec'])$(id).addEventListener('input',calcEnergy);for(const id of ['c1','c2','c3'])$(id).addEventListener('input',()=>calcReactive('capacitors'));for(const id of ['l1','l2','l3'])$(id).addEventListener('input',()=>calcReactive('inductors'));
@@ -1886,6 +2020,7 @@ document.addEventListener('keydown',e=>{
 
 initCustomSelects();
 initResistorBuilder();
+initResistorView();
 initSmd();
 initCeramic();
 initNewCalculators();
