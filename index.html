@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a1326">
 <meta name="description" content="Elektrotechnická kalkulačka Veselá kozenka – Ohmův zákon, rezistory, barevné proužky, SMD kódy, keramické kondenzátory, baterie, vodiče, transformátory, blikání LED, dělič napětí a spotřeba elektřiny.">
-<title>Elektrotechnická kalkulačka Veselá kozenka · v2.8</title>
+<title>Elektrotechnická kalkulačka Veselá kozenka · v2.8.1</title>
 <link rel="icon" type="image/png" sizes="48x48" href="./favicon-48.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -506,7 +506,7 @@ body.picker-open{overflow:hidden}
   <div class="result-label">Úbytek napětí na vedení</div>
   <div id="wire-result" class="result-grid" aria-live="polite"></div>
   <p class="wire-status" id="wire-status" aria-live="polite"></p>
-  <p class="calc-hint"><strong>Orientační výpočet:</strong> odpor měděného či hliníkového vodiče podle teploty, délky a průřezu. Pro AC je použito zjednodušení s účiníkem, <strong>bez indukční reaktance kabelu</strong>. U AC 3f předpokládáme vyvážené zatížení a sdružené napětí; u DC dvouvodičový okruh. Výpočet neurčuje přípustný průřez, jištění ani bezpečnost instalace.</p>
+  <p class="calc-hint"><strong>Orientační výpočet:</strong> pro měď je použita referenční rezistivita 0,017241 Ω·mm²/m při 20 °C; odpor konkrétního kabelu se může lišit. Odpor měděného či hliníkového vodiče závisí na teplotě, délce a průřezu. Pro AC je použito zjednodušení s účiníkem, <strong>bez indukční reaktance kabelu</strong>. U AC 3f předpokládáme vyvážené zatížení a sdružené napětí; u DC dvouvodičový okruh. Výpočet neurčuje přípustný průřez, jištění ani bezpečnost instalace.</p>
   <div class="formula"><code>R = ρ(T) · ℓ / S</code> &nbsp;·&nbsp; <code>ΔU ≈ k · I · R · cos φ</code></div>
  </div>
 </section>
@@ -625,7 +625,7 @@ body.picker-open{overflow:hidden}
  </div>
 </section>
 
- <footer class="footer">🐐 Veselá kozenka · v2.8</footer>
+ <footer class="footer">🐐 Veselá kozenka · v2.8.1</footer>
 </main>
 <div class="picker-overlay" id="picker-overlay" hidden>
  <div class="picker-dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
@@ -1146,7 +1146,7 @@ function onBatteryUnitChanged(id,previous,newUnit){
 }
 /* Úbytek napětí: orientační výpočet s teplotní závislostí rezistivity. */
 const wireMaterials={
- cu:{rho20:0.0175,alpha:0.00393},
+ cu:{rho20:0.017241,alpha:0.00393},
  al:{rho20:0.0282,alpha:0.00403}
 };
 const wireNominalVoltage={ac1:230,ac3:400,dc:24};
