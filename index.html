@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a1326">
 <meta name="description" content="Elektrotechnická kalkulačka Veselá kozenka – Ohmův zákon, rezistory, barevné proužky, SMD kódy, keramické kondenzátory, baterie, vodiče, transformátory, blikání LED, dělič napětí a spotřeba elektřiny.">
-<title>Elektrotechnická kalkulačka Veselá kozenka · v2.7</title>
+<title>Elektrotechnická kalkulačka Veselá kozenka · v2.8</title>
 <link rel="icon" type="image/png" sizes="48x48" href="./favicon-48.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -203,6 +203,33 @@ body.picker-open{overflow:hidden}
 .picker-search input::-webkit-search-cancel-button{cursor:pointer}
 .picker-empty{text-align:center;margin:18px 5px;padding:18px 10px;border:1px dashed #476078;border-radius:12px;color:#acc3d7;font-size:14px}
 
+
+/* v2.8 · Úbytek napětí: síť, kabel a zátěž */
+.wire-block{margin:0 0 16px}
+.wire-section-title{margin:0 0 8px 3px;color:#79e8d2;font-size:18px;font-weight:800;line-height:1.3}
+.wire-pane{border:1px solid #3e5b75;border-radius:17px;background:linear-gradient(155deg,#1b2b43,#152439);padding:16px}
+.wire-field{margin-bottom:17px}
+.wire-pane>.field+.field{margin-top:16px}
+.wire-choice-set{border:0;margin:0 0 18px;padding:0;min-width:0}
+.wire-choice-set legend{padding:0;margin:0 0 10px;color:#c0d2e5;font-size:12px;font-weight:650}
+.wire-radio-list{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.wire-radio{display:inline-flex;align-items:center;gap:8px;color:#e4f0fa;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+.wire-radio input{appearance:none;width:20px;height:20px;flex:0 0 20px;border:2px solid #729bb5;border-radius:50%;background:#112137;display:grid;place-items:center;margin:0;cursor:pointer}
+.wire-radio input:checked{border-color:#50e3c2}
+.wire-radio input:checked::before{content:"";width:10px;height:10px;border-radius:50%;background:#50e3c2}
+.wire-radio input:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.wire-field-hint{margin:10px 0 0;color:#a8bfd3;font-size:12px;line-height:1.55}
+.wire-length-controls{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:14px}
+.wire-length-choice{margin:0 0 9px}
+.wire-length-choice legend{margin-bottom:8px}
+.wire-length-choice .wire-radio-list{gap:12px}
+.wire-two-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.wire-load-wrap[hidden],#wire-cos-wrap[hidden]{display:none!important}
+.wire-status{min-height:0;color:#afc9dd;font-size:13px;line-height:1.55;margin:12px 0 0}
+.wire-status.warning{color:#ffca99}
+@media(max-width:560px){.wire-two-col{grid-template-columns:1fr}.wire-pane{padding:14px}.wire-section-title{font-size:17px}}
+@media(max-width:410px){.wire-length-controls{grid-template-columns:1fr;gap:9px}.wire-length-choice{margin:0}.wire-length-choice legend{display:none}.wire-radio-list{gap:12px}.wire-pane{padding:13px}}
+
 </style>
 </head>
 <body>
@@ -222,7 +249,7 @@ body.picker-open{overflow:hidden}
       <option value="divider">📉 Odporový dělič napětí</option>
       <option value="energy">🔌 Spotřeba a cena elektřiny</option>
       <option value="battery">🔋 Výdrž baterie</option>
-      <option value="wire">📏 Odpor vodiče podle délky</option>
+      <option value="wire">📉 Úbytek napětí</option>
       <option value="transformer">🧲 Převod závitů transformátoru</option>
       <option value="led-blink">💡 Blikání LED (NE555)</option>
     </select>
@@ -420,23 +447,68 @@ body.picker-open{overflow:hidden}
  <div class="card"><div class="result-label">Orientační výdrž</div><div id="battery-result" class="result-grid" aria-live="polite"></div></div>
 </section>
 
-<section class="panel" id="wire" aria-label="Odpor vodiče podle délky">
- <div class="card">
-  <h2>Odpor vodiče podle délky</h2>
-  <p class="sub">Vypočítej odpor kabelu, úbytek napětí a ztráty podle délky, průřezu a materiálu.</p>
-  <div class="circuit-mini"><span class="mini-symbol" aria-hidden="true">📏</span><div class="mini-copy"><strong>Zdroj ─ vodič ─ spotřebič</strong>Délku zadávej v jednom směru; můžeš zahrnout i zpětný vodič.</div></div>
-  <div class="fields">
-   <div class="field"><span>Délka jedním směrem</span><div class="control"><input id="wire-length" class="with-unit" aria-label="Délka vedení" type="text" inputmode="decimal" value="10"><select id="wire-length-unit" class="unit-choice" aria-label="Jednotka délky"><option value="1" selected>m</option><option value="1000">km</option></select></div></div>
-   <label class="field"><span>Průřez vodiče</span><div class="control"><input id="wire-area" type="text" inputmode="decimal" value="2,5"><span class="unit">mm²</span></div></label>
-   <div class="field"><span>Materiál</span><select id="wire-material"><option value="0.0175" selected>Měď (Cu)</option><option value="0.0282">Hliník (Al)</option></select></div>
-   <div class="field"><span>Počítat</span><select id="wire-path"><option value="2" selected>Cestu tam i zpět</option><option value="1">Jeden vodič</option></select></div>
-   <label class="field"><span>Proud</span><div class="control"><input id="wire-current" type="text" inputmode="decimal" value="10"><span class="unit">A</span></div></label>
-   <label class="field"><span>Napájecí napětí</span><div class="control"><input id="wire-voltage" type="text" inputmode="decimal" value="12"><span class="unit">V</span></div></label>
+<section class="panel" id="wire" aria-label="Úbytek napětí">
+ <div class="wire-block">
+  <h2 class="wire-section-title">Síť</h2>
+  <div class="wire-pane">
+   <fieldset class="wire-choice-set" aria-label="Typ elektrické sítě">
+    <legend>Typ systému</legend>
+    <div class="wire-radio-list">
+     <label class="wire-radio"><input type="radio" name="wire-system" value="ac1" checked><span>AC 1f</span></label>
+     <label class="wire-radio"><input type="radio" name="wire-system" value="ac3"><span>AC 3f</span></label>
+     <label class="wire-radio"><input type="radio" name="wire-system" value="dc"><span>DC ⎓</span></label>
+    </div>
+   </fieldset>
+   <label class="field"><span id="wire-voltage-label">Jmenovité napětí U (V)</span><div class="control"><input id="wire-voltage" type="text" inputmode="decimal" value="230" aria-labelledby="wire-voltage-label" autocomplete="off"><span class="unit">V</span></div></label>
+   <p class="wire-field-hint" id="wire-system-hint">Jednofázová síť: napětí mezi fází a nulovým vodičem.</p>
   </div>
-  <p class="calc-hint"><strong>Předpoklad:</strong> stejnosměrný obvod a odpor vodiče přibližně při 20 °C. U střídavých vedení, delších tras a zahřívaných kabelů jde jen o zjednodušený výpočet. Neurčuje bezpečný průřez instalace.</p>
  </div>
- <div class="card"><div class="result-label">Odpor a úbytek napětí</div><div id="wire-result" class="result-grid" aria-live="polite"></div>
- <div class="formula"><code>R = ρ × ℓ / S</code> &nbsp;·&nbsp; <code>ΔU = I × R</code></div></div>
+
+ <div class="wire-block">
+  <h2 class="wire-section-title">Kabel</h2>
+  <div class="wire-pane">
+   <div class="field wire-field"><span>Materiál vodiče</span>
+    <select id="wire-material" aria-label="Materiál vodiče"><option value="cu" selected>Měď (Cu)</option><option value="al">Hliník (Al)</option></select>
+   </div>
+   <div class="wire-length-controls wire-field">
+    <label class="field"><span>Délka kabelu (jedním směrem)</span><div class="control"><input id="wire-length" type="text" inputmode="decimal" value="25" autocomplete="off" aria-label="Délka kabelu"></div></label>
+    <fieldset class="wire-choice-set wire-length-choice"><legend>Jednotka délky</legend><div class="wire-radio-list">
+     <label class="wire-radio"><input type="radio" name="wire-length-unit" value="m" checked><span>metry</span></label>
+     <label class="wire-radio"><input type="radio" name="wire-length-unit" value="ft"><span>stopy</span></label>
+    </div></fieldset>
+   </div>
+   <div class="wire-two-col">
+    <label class="field"><span>Průřez vodiče</span><div class="control"><input id="wire-area" type="text" inputmode="decimal" value="2,5" autocomplete="off"><span class="unit">mm²</span></div></label>
+    <label class="field"><span>Teplota vodiče</span><div class="control"><input id="wire-temperature" type="text" inputmode="decimal" value="20" autocomplete="off"><span class="unit">°C</span></div></label>
+   </div>
+  </div>
+ </div>
+
+ <div class="wire-block">
+  <h2 class="wire-section-title">Zátěž</h2>
+  <div class="wire-pane">
+   <fieldset class="wire-choice-set wire-field" aria-label="Způsob výpočtu zátěže">
+    <legend>Způsob výpočtu</legend>
+    <div class="wire-radio-list">
+     <label class="wire-radio"><input type="radio" name="wire-load-mode" value="current" checked><span>Podle proudu</span></label>
+     <label class="wire-radio"><input type="radio" name="wire-load-mode" value="power"><span>Podle výkonu</span></label>
+    </div>
+   </fieldset>
+   <div class="wire-two-col">
+    <label class="field wire-load-wrap" id="wire-current-wrap"><span>Zátěžový proud</span><div class="control"><input id="wire-current" type="text" inputmode="decimal" value="16" autocomplete="off"><span class="unit">A</span></div></label>
+    <label class="field wire-load-wrap" id="wire-power-wrap" hidden><span>Činný příkon zátěže</span><div class="control"><input id="wire-power" type="text" inputmode="decimal" value="3680" autocomplete="off"><span class="unit">W</span></div></label>
+    <label class="field" id="wire-cos-wrap"><span>Účiník (cos φ)</span><div class="control"><input id="wire-cos" type="text" inputmode="decimal" value="1,00" autocomplete="off"></div></label>
+   </div>
+   <p class="wire-field-hint">U AC se používá účiník 0 až 1 (bez nuly). U DC se účiník neuplatňuje.</p>
+  </div>
+ </div>
+ <div class="card">
+  <div class="result-label">Úbytek napětí na vedení</div>
+  <div id="wire-result" class="result-grid" aria-live="polite"></div>
+  <p class="wire-status" id="wire-status" aria-live="polite"></p>
+  <p class="calc-hint"><strong>Orientační výpočet:</strong> odpor měděného či hliníkového vodiče podle teploty, délky a průřezu. Pro AC je použito zjednodušení s účiníkem, <strong>bez indukční reaktance kabelu</strong>. U AC 3f předpokládáme vyvážené zatížení a sdružené napětí; u DC dvouvodičový okruh. Výpočet neurčuje přípustný průřez, jištění ani bezpečnost instalace.</p>
+  <div class="formula"><code>R = ρ(T) · ℓ / S</code> &nbsp;·&nbsp; <code>ΔU ≈ k · I · R · cos φ</code></div>
+ </div>
 </section>
 
 <section class="panel" id="transformer" aria-label="Převod závitů transformátoru">
@@ -553,7 +625,7 @@ body.picker-open{overflow:hidden}
  </div>
 </section>
 
- <footer class="footer">🐐 Veselá kozenka · v2.7</footer>
+ <footer class="footer">🐐 Veselá kozenka · v2.8</footer>
 </main>
 <div class="picker-overlay" id="picker-overlay" hidden>
  <div class="picker-dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
@@ -1072,26 +1144,110 @@ function onBatteryUnitChanged(id,previous,newUnit){
  }
  calcBattery();
 }
-function wireResistance(lengthMeters,areaMm2,rho,paths){return rho*lengthMeters*paths/areaMm2}
-function calcWire(){
- const length=parse($('wire-length').value)*Number($('wire-length-unit').value);
- const area=parse($('wire-area').value),rho=Number($('wire-material').value),paths=Number($('wire-path').value);
- const current=parse($('wire-current').value),voltage=parse($('wire-voltage').value);
- if(![length,area,rho,paths,current,voltage].every(Number.isFinite)||length<=0||area<=0||current<0||voltage<=0){
-  fail('wire-result','Zadej kladnou délku, průřez a napětí. Proud může být i 0 A.');return;
- }
- const resistance=wireResistance(length,area,rho,paths),drop=resistance*current,loss=drop*current,pct=drop/voltage*100;
- if(![resistance,drop,loss,pct].every(Number.isFinite)){
-  fail('wire-result','Hodnoty jsou mimo rozsah výpočtu.');return;
- }
- show('wire-result',[
-  metric('Odpor vedení',pretty(resistance,'R'),true),
-  metric('Úbytek napětí',pretty(drop,'U'),true),
-  metric('Úbytek z napětí',number(pct)+' %'),
-  metric('Ztrátový výkon',pretty(loss,'P')),
-  metric('Napětí na konci (orientačně)',number(voltage-drop)+' V',false,true)
- ]);
+/* Úbytek napětí: orientační výpočet s teplotní závislostí rezistivity. */
+const wireMaterials={
+ cu:{rho20:0.0175,alpha:0.00393},
+ al:{rho20:0.0282,alpha:0.00403}
+};
+const wireNominalVoltage={ac1:230,ac3:400,dc:24};
+const wireSystemInfo={
+ ac1:'Jednofázová síť: napětí mezi fází a nulovým vodičem.',
+ ac3:'Třífázová síť: sdružené napětí mezi fázemi, vyvážené zatížení.',
+ dc:'Stejnosměrný dvouvodičový obvod: napětí mezi + a −.'
+};
+function wireSystem(){return document.querySelector('input[name="wire-system"]:checked').value}
+function wireLengthUnit(){return document.querySelector('input[name="wire-length-unit"]:checked').value}
+function wireLoadMode(){return document.querySelector('input[name="wire-load-mode"]:checked').value}
+function wireCurrentFromPower(power,voltage,cosPhi,system){
+ return power/(voltage*(system==='ac3'?Math.sqrt(3):1)*(system==='dc'?1:cosPhi));
 }
+function wirePowerFromCurrent(current,voltage,cosPhi,system){
+ return current*voltage*(system==='ac3'?Math.sqrt(3):1)*(system==='dc'?1:cosPhi);
+}
+function wireCalculate(system,voltage,lengthMeters,section,material,tempC,current,cosPhi){
+ const conductor=wireMaterials[material];
+ if(!conductor||!['ac1','ac3','dc'].includes(system)||![voltage,lengthMeters,section,tempC,current,cosPhi].every(Number.isFinite)||voltage<=0||lengthMeters<=0||section<=0||current<0||tempC< -50||tempC>200||cosPhi<=0||cosPhi>1)return null;
+ const rho=conductor.rho20*(1+conductor.alpha*(tempC-20));
+ if(rho<=0)return null;
+ const oneWayResistance=rho*lengthMeters/section;
+ const phaseFactor=system==='ac3'?Math.sqrt(3):2;
+ const powerLossFactor=system==='ac3'?3:2;
+ const voltageDrop=phaseFactor*current*oneWayResistance*(system==='dc'?1:cosPhi);
+ const percentage=100*voltageDrop/voltage;
+ const loss=powerLossFactor*current*current*oneWayResistance;
+ const power=wirePowerFromCurrent(current,voltage,cosPhi,system);
+ return {rho,oneWayResistance,voltageDrop,percentage,loss,power,current,loadVoltage:voltage-voltageDrop};
+}
+function calcWire(){
+ const system=wireSystem(),voltage=parse($('wire-voltage').value),lengthRaw=parse($('wire-length').value);
+ const lengthMeters=lengthRaw*(wireLengthUnit()==='ft'?0.3048:1);
+ const section=parse($('wire-area').value),material=$('wire-material').value,tempC=parse($('wire-temperature').value);
+ const cosPhi=system==='dc'?1:parse($('wire-cos').value);
+ const mode=wireLoadMode(),input=mode==='power'?parse($('wire-power').value):parse($('wire-current').value);
+ const current=mode==='power'?wireCurrentFromPower(input,voltage,cosPhi,system):input;
+ $('wire-current-wrap').hidden=mode!=='current';
+ $('wire-power-wrap').hidden=mode!=='power';
+ $('wire-cos-wrap').hidden=system==='dc';
+ $('wire-system-hint').textContent=wireSystemInfo[system];
+ const status=$('wire-status');
+ status.classList.remove('warning');status.textContent='';
+ if(![voltage,lengthMeters,section,tempC,cosPhi,input,current].every(Number.isFinite)||voltage<=0||lengthMeters<=0||section<=0||input<0||tempC< -50||tempC>200||cosPhi<=0||cosPhi>1){
+  fail('wire-result','Zadej kladné napětí, délku a průřez, nezáporný proud nebo příkon, teplotu −50 až 200 °C a účiník větší než 0, nejvýše 1.');return;
+ }
+ const result=wireCalculate(system,voltage,lengthMeters,section,material,tempC,current,cosPhi);
+ if(!result||![result.voltageDrop,result.loss,result.percentage,result.power].every(Number.isFinite)){
+  fail('wire-result','Zadané hodnoty jsou mimo rozsah výpočtu.');return;
+ }
+ const wireType=system==='ac3'?'Odpor jedné fáze':'Odpor jednoho vodiče';
+ show('wire-result',[
+  metric('Úbytek napětí',pretty(result.voltageDrop,'U'),true),
+  metric('Procentuální úbytek',number(result.percentage)+' %',true),
+  metric('Napětí na konci vedení',result.loadVoltage>=0?pretty(result.loadVoltage,'U'):'Nedostatečné napětí'),
+  metric(wireType,pretty(result.oneWayResistance,'R')),
+  metric('Ztrátový výkon vedení',pretty(result.loss,'P')),
+  metric('Zátěžový proud',pretty(result.current,'I')),
+  metric('Činný příkon zátěže',pretty(result.power,'P'),false,true)
+ ]);
+ if(result.percentage>=100){
+  status.classList.add('warning');
+  status.textContent='Úbytek je nejméně 100 % napájecího napětí – zadané vedení není pro tuto zátěž použitelné. Jednoduchý model v takovém stavu ztrácí přesnost.';
+ }else if(result.percentage>5){
+  status.classList.add('warning');
+  status.textContent='Výrazný úbytek napětí. Prověř parametry vedení a požadavky konkrétního zařízení.';
+ }else{
+  status.textContent='Výsledky odpovídají zadané teplotě vodiče. Výpočet neuvažuje reaktanci ani další instalační vlivy.';
+ }
+}
+function updateWireSystem(){
+ const previous=updateWireSystem.previous||'ac1',next=wireSystem();
+ const u=parse($('wire-voltage').value);
+ if(!Number.isFinite(u)||Math.abs(u-wireNominalVoltage[previous])<1e-8)
+  $('wire-voltage').value=wireNominalVoltage[next];
+ updateWireSystem.previous=next;
+ calcWire();
+}
+function updateWireLoadMode(){
+ const mode=wireLoadMode(),system=wireSystem(),voltage=parse($('wire-voltage').value),cosPhi=system==='dc'?1:parse($('wire-cos').value);
+ if(mode==='power'){
+  const current=parse($('wire-current').value);
+  if(Number.isFinite(current)&&Number.isFinite(voltage)&&Number.isFinite(cosPhi))
+   $('wire-power').value=editableNumber(wirePowerFromCurrent(current,voltage,cosPhi,system));
+ }else{
+  const power=parse($('wire-power').value);
+  if(Number.isFinite(power)&&Number.isFinite(voltage)&&Number.isFinite(cosPhi)&&voltage>0&&cosPhi>0)
+   $('wire-current').value=editableNumber(wireCurrentFromPower(power,voltage,cosPhi,system));
+ }
+ calcWire();
+}
+function updateWireLengthUnit(){
+ const unit=wireLengthUnit(),previous=updateWireLengthUnit.previous||'m',raw=parse($('wire-length').value);
+ if(Number.isFinite(raw)&&unit!==previous){
+  $('wire-length').value=editableNumber(raw*(previous==='ft'?0.3048:1)/(unit==='ft'?0.3048:1));
+ }
+ updateWireLengthUnit.previous=unit;
+ calcWire();
+}
+
 function transformerTurnsFromCore(voltage,f,areaCm2,fluxT){
  return voltage/(4.44*f*areaCm2*1e-4*fluxT);
 }
@@ -1137,20 +1293,17 @@ function calcTransformer(){
 function initNewCalculators(){
  const calcEvents={
   'bat-cap':calcBattery,'bat-voltage':calcBattery,'bat-load':calcBattery,'bat-usable':calcBattery,'bat-eff':calcBattery,
-  'wire-length':calcWire,'wire-area':calcWire,'wire-current':calcWire,'wire-voltage':calcWire,
+  'wire-length':calcWire,'wire-area':calcWire,'wire-current':calcWire,'wire-power':calcWire,'wire-voltage':calcWire,'wire-temperature':calcWire,'wire-cos':calcWire,
   'tr-u1':calcTransformer,'tr-u2':calcTransformer,'tr-n1':calcTransformer,'tr-f':calcTransformer,'tr-area':calcTransformer,'tr-b':calcTransformer
  };
  for(const [id,calc] of Object.entries(calcEvents))$(id).addEventListener('input',calc);
  let prevCap=$('bat-cap-unit').value,prevLoad=$('bat-load-unit').value;
  $('bat-cap-unit').addEventListener('change',()=>{const value=$('bat-cap-unit').value;onBatteryUnitChanged('bat-cap-unit',prevCap,value);prevCap=value});
  $('bat-load-unit').addEventListener('change',()=>{const value=$('bat-load-unit').value;onBatteryUnitChanged('bat-load-unit',prevLoad,value);prevLoad=value});
- let prevLength=Number($('wire-length-unit').value);
- $('wire-length-unit').addEventListener('change',()=>{
-  const factor=Number($('wire-length-unit').value),raw=parse($('wire-length').value);
-  if(Number.isFinite(raw))$('wire-length').value=editableNumber(raw*prevLength/factor);
-  prevLength=factor;calcWire();
- });
- for(const id of ['wire-material','wire-path'])$(id).addEventListener('change',calcWire);
+ for(const radio of document.querySelectorAll('input[name="wire-system"]'))radio.addEventListener('change',updateWireSystem);
+ for(const radio of document.querySelectorAll('input[name="wire-length-unit"]'))radio.addEventListener('change',updateWireLengthUnit);
+ for(const radio of document.querySelectorAll('input[name="wire-load-mode"]'))radio.addEventListener('change',updateWireLoadMode);
+ $('wire-material').addEventListener('change',calcWire);
  $('tr-method').addEventListener('change',calcTransformer);
  calcBattery();calcWire();calcTransformer();
 }
