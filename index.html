@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a1326">
 <meta name="description" content="Elektrotechnická kalkulačka Veselá kozenka – Ohmův zákon, rezistory, barevné proužky, SMD kódy, keramické kondenzátory, baterie, vodiče, transformátory, blikání LED, dělič napětí a spotřeba elektřiny.">
-<title>Elektrotechnická kalkulačka Veselá kozenka · v3.2</title>
+<title>Elektrotechnická kalkulačka Veselá kozenka · v3.3</title>
 <link rel="icon" type="image/png" sizes="48x48" href="./favicon-48.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -307,6 +307,11 @@ body.picker-open{overflow:hidden}
  .res-builder-new-actions .res-builder-button{width:100%}
 }
 
+
+/* v3.3: kondenzátorové a cívkové IEC značky */
+.res-builder-diagram .rb-react-symbol{stroke:#83e9d8;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.res-builder-diagram .rb-react-symbol.branch{stroke:#e6b8ff}
+
 </style>
 </head>
 <body>
@@ -390,38 +395,63 @@ body.picker-open{overflow:hidden}
 </section>
  
 <section id="capacitors" class="panel" aria-label="Skládání kondenzátorů">
-  <div class="card">
-    <h2>Sériové a paralelní zapojení kondenzátorů</h2>
-    <p class="sub">Zadej kapacitu až tří kondenzátorů. U každého si můžeš zvolit jednotku.</p>
-    <div class="fields three">
-      <label class="field"><span>Kondenzátor C₁</span><div class="control"><input id="c1" type="text" inputmode="decimal" value="100"><span class="unit">nF</span></div></label>
-      <label class="field"><span>Kondenzátor C₂</span><div class="control"><input id="c2" type="text" inputmode="decimal" value="220"><span class="unit">nF</span></div></label>
-      <label class="field"><span>Kondenzátor C₃</span><div class="control"><input id="c3" type="text" inputmode="decimal" placeholder="Volitelné"><span class="unit">nF</span></div></label>
-    </div>
-  </div>
-  <div class="card">
-    <div class="result-label">Výsledná kapacita</div>
-    <div id="capacitors-result" class="result-grid" aria-live="polite"></div>
-    <p class="helper">Paralelně: C = C₁ + C₂ + … · Sériově: 1/C = 1/C₁ + 1/C₂ + …</p>
-  </div>
-</section>
-
+<div class="card">
+<h2>Vlastní zapojení kondenzátorů</h2>
+<p class="sub">Přidávej sériové a paralelní části v libovolném pořadí. Nastav si počet a hodnoty součástek, schéma se mění automaticky.</p>
+<div class="res-builder-blocks" id="capacitors-builder-blocks"></div>
+<div class="res-builder-new-block"><div class="res-builder-kicker">PŘIDAT DALŠÍ ČÁST ZAPOJENÍ</div>
+<p class="res-builder-desc">Nová část bude za předchozí. Pořadí částí změníš šipkami ↑ ↓.</p>
+<div class="res-builder-new-actions">
+<button type="button" class="res-builder-button res-builder-add" id="capacitors-add-series">+ Sériová část</button>
+<button type="button" class="res-builder-button res-builder-add" id="capacitors-add-parallel">+ Paralelní část</button>
+</div><p class="res-builder-limit-hint">Až 20 částí a 60 součástek v každé části.</p></div></div>
+<div class="card">
+<div class="result-label">Schéma zapojení</div>
+<div class="res-view-toolbar" role="group" aria-label="Ovládání schématu">
+<span class="res-view-hint">✋ Posuň · 🤏 Přibliž dvěma prsty</span>
+<div class="res-view-actions">
+<button type="button" class="res-view-btn" id="capacitors-zoom-out" aria-label="Oddálit">−</button>
+<span class="res-view-zoom" id="capacitors-zoom-level" aria-live="off">100 %</span>
+<button type="button" class="res-view-btn" id="capacitors-zoom-in" aria-label="Přiblížit">+</button>
+<button type="button" class="res-view-btn res-view-center" id="capacitors-center">◎ Vycentrovat</button>
+</div></div>
+<div class="res-builder-diagram" id="capacitors-diagram" tabindex="0" role="region" aria-label="Schéma: jedním prstem posouváš, dvěma přibližuješ.">
+<svg id="capacitors-diagram-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma zapojení kondenzátorů"></svg>
+</div>
+<p class="res-builder-diagram-help">Jedním prstem posouváš, <strong>dvěma prsty přibližuješ a oddaluješ</strong>. Vycentrovat zobrazí celý obvod.</p>
+<div class="result-label res-builder-result-heading">Výsledná kapacita</div>
+<div id="capacitors-result" class="result-grid" aria-live="polite"></div>
+<p class="helper">Při sériovém zapojení se kapacity kombinují převráceným součtem, při paralelním se sčítají. Všechny celé části jsou zapojeny za sebou do série. Výpočet platí pro ideální součástky.</p>
+</div></section>
 <section id="inductors" class="panel" aria-label="Skládání cívek">
-  <div class="card">
-    <h2>Sériové a paralelní zapojení cívek</h2>
-    <p class="sub">Zadej indukčnost až tří cívek. U každé si můžeš zvolit jednotku.</p>
-    <div class="fields three">
-      <label class="field"><span>Cívka L₁</span><div class="control"><input id="l1" type="text" inputmode="decimal" value="10"><span class="unit">mH</span></div></label>
-      <label class="field"><span>Cívka L₂</span><div class="control"><input id="l2" type="text" inputmode="decimal" value="20"><span class="unit">mH</span></div></label>
-      <label class="field"><span>Cívka L₃</span><div class="control"><input id="l3" type="text" inputmode="decimal" placeholder="Volitelné"><span class="unit">mH</span></div></label>
-    </div>
-  </div>
-  <div class="card">
-    <div class="result-label">Výsledná indukčnost</div>
-    <div id="inductors-result" class="result-grid" aria-live="polite"></div>
-    <p class="helper">Sériově: L = L₁ + L₂ + … · Paralelně: 1/L = 1/L₁ + 1/L₂ + … Platí pro ideální cívky bez vzájemné magnetické vazby.</p>
-  </div>
-</section>
+<div class="card">
+<h2>Vlastní zapojení cívek</h2>
+<p class="sub">Přidávej sériové a paralelní části v libovolném pořadí. Nastav si počet a hodnoty součástek, schéma se mění automaticky.</p>
+<div class="res-builder-blocks" id="inductors-builder-blocks"></div>
+<div class="res-builder-new-block"><div class="res-builder-kicker">PŘIDAT DALŠÍ ČÁST ZAPOJENÍ</div>
+<p class="res-builder-desc">Nová část bude za předchozí. Pořadí částí změníš šipkami ↑ ↓.</p>
+<div class="res-builder-new-actions">
+<button type="button" class="res-builder-button res-builder-add" id="inductors-add-series">+ Sériová část</button>
+<button type="button" class="res-builder-button res-builder-add" id="inductors-add-parallel">+ Paralelní část</button>
+</div><p class="res-builder-limit-hint">Až 20 částí a 60 součástek v každé části.</p></div></div>
+<div class="card">
+<div class="result-label">Schéma zapojení</div>
+<div class="res-view-toolbar" role="group" aria-label="Ovládání schématu">
+<span class="res-view-hint">✋ Posuň · 🤏 Přibliž dvěma prsty</span>
+<div class="res-view-actions">
+<button type="button" class="res-view-btn" id="inductors-zoom-out" aria-label="Oddálit">−</button>
+<span class="res-view-zoom" id="inductors-zoom-level" aria-live="off">100 %</span>
+<button type="button" class="res-view-btn" id="inductors-zoom-in" aria-label="Přiblížit">+</button>
+<button type="button" class="res-view-btn res-view-center" id="inductors-center">◎ Vycentrovat</button>
+</div></div>
+<div class="res-builder-diagram" id="inductors-diagram" tabindex="0" role="region" aria-label="Schéma: jedním prstem posouváš, dvěma přibližuješ.">
+<svg id="inductors-diagram-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma zapojení cívek"></svg>
+</div>
+<p class="res-builder-diagram-help">Jedním prstem posouváš, <strong>dvěma prsty přibližuješ a oddaluješ</strong>. Vycentrovat zobrazí celý obvod.</p>
+<div class="result-label res-builder-result-heading">Výsledná indukčnost</div>
+<div id="inductors-result" class="result-grid" aria-live="polite"></div>
+<p class="helper">Indukčnosti se v sérii sčítají, paralelně se kombinují převráceným součtem. Cívky jsou ideální a bez vzájemné magnetické vazby. Všechny celé části jsou zapojeny za sebou do série. Výpočet platí pro ideální součástky.</p>
+</div></section>
 
 <section class="panel" id="bands" aria-label="Barevné proužky"><div class="card">
   
@@ -752,7 +782,7 @@ body.picker-open{overflow:hidden}
  </div>
 </section>
 
- <footer class="footer">🐐 Veselá kozenka · v3.2</footer>
+ <footer class="footer">🐐 Veselá kozenka · v3.3</footer>
 </main>
 <div class="picker-overlay" id="picker-overlay" hidden>
  <div class="picker-dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
@@ -777,10 +807,10 @@ function fail(id,message){const el=document.createElement('p');el.className='err
 const labels={U:['Napětí U','V'],I:['Proud I','A'],R:['Odpor R','Ω'],P:['Výkon P','W']};
 const defaults={U:12,I:2,R:6,P:24};
 const ohmState={...defaults},ohmFactors={U:1,I:1,R:1,P:1};
-const unitInputs={"ohm-input-1":'I',"ohm-input-2":'R',"ohm-input-3":'P',"blink-ra":'R',"blink-rb":'R',du:'U',dr1:'R',dr2:'R',ep:'P',c1:'C',c2:'C',c3:'C',l1:'L',l2:'L',l3:'L'};
-const unitCalculators={'ohm-input-1':()=>calcOhm(),'ohm-input-2':()=>calcOhm(),'ohm-input-3':()=>calcOhm(),'blink-ra':()=>calcBlink(),'blink-rb':()=>calcBlink(),du:()=>calcDivider(),dr1:()=>calcDivider(),dr2:()=>calcDivider(),ep:()=>calcEnergy(),c1:()=>calcReactive('capacitors'),c2:()=>calcReactive('capacitors'),c3:()=>calcReactive('capacitors'),l1:()=>calcReactive('inductors'),l2:()=>calcReactive('inductors'),l3:()=>calcReactive('inductors')};
+const unitInputs={"ohm-input-1":'I',"ohm-input-2":'R',"ohm-input-3":'P',"blink-ra":'R',"blink-rb":'R',du:'U',dr1:'R',dr2:'R',ep:'P'};
+const unitCalculators={'ohm-input-1':()=>calcOhm(),'ohm-input-2':()=>calcOhm(),'ohm-input-3':()=>calcOhm(),'blink-ra':()=>calcBlink(),'blink-rb':()=>calcBlink(),du:()=>calcDivider(),dr1:()=>calcDivider(),dr2:()=>calcDivider(),ep:()=>calcEnergy()};
 function editableNumber(value){return String(Number(value.toPrecision(12)))}
-const inputDefaultUnits={"blink-ra":1000,"blink-rb":1000,c1:1e-9,c2:1e-9,c3:1e-9,l1:1e-3,l2:1e-3,l3:1e-3};
+const inputDefaultUnits={"blink-ra":1000,"blink-rb":1000};
 function assignUnitOptions(select,key,factor=1){
  select.replaceChildren();
  for(const [name,value] of units[key]){const option=document.createElement('option');option.textContent=name;option.value=String(value);select.append(option)}
@@ -909,6 +939,389 @@ function circuitMetric(name,value,kind,count){
  return card;
 }
 
+
+
+function createReactiveView(kind){
+/* v3.1: volné 2D posouvání a zoom schématu bez tradičních posuvníků. */
+const resistorView={x:0,y:0,scale:1,ready:false,drag:null,pointers:new Map(),gesture:null};
+const resistorViewMinZoom=0.04,resistorViewMaxZoom=4;
+function resistorViewDimensions(){
+ const svg=$(kind+'-diagram-svg');
+ return {
+  width:Number(svg.getAttribute('width'))||0,
+  height:Number(svg.getAttribute('height'))||0
+ };
+}
+function applyResistorView(){
+ const diagram=$(kind+'-diagram');
+ if(!diagram.clientWidth||!diagram.clientHeight)return;
+ const svg=$(kind+'-diagram-svg');
+ svg.style.transform='translate3d('+resistorView.x+'px,'+resistorView.y+'px,0) scale('+resistorView.scale+')';
+ $(kind+'-zoom-level').textContent=Math.round(resistorView.scale*100)+' %';
+}
+function ensureResistorView(){
+ const diagram=$(kind+'-diagram');
+ if(!diagram.clientWidth||!diagram.clientHeight)return;
+ if(!resistorView.ready){
+  const {height}=resistorViewDimensions();
+  resistorView.scale=1;
+  resistorView.x=17;
+  resistorView.y=Math.max(12,(diagram.clientHeight-height)/2);
+  resistorView.ready=true;
+ }
+ applyResistorView();
+}
+function fitResistorView(){
+ const diagram=$(kind+'-diagram'),size=resistorViewDimensions();
+ if(!diagram.clientWidth||!diagram.clientHeight||!size.width||!size.height)return;
+ const padding=32;
+ resistorView.scale=Math.max(resistorViewMinZoom,Math.min(1.5,(diagram.clientWidth-padding)/size.width,(diagram.clientHeight-padding)/size.height));
+ resistorView.x=(diagram.clientWidth-size.width*resistorView.scale)/2;
+ resistorView.y=(diagram.clientHeight-size.height*resistorView.scale)/2;
+ resistorView.ready=true;
+ applyResistorView();
+}
+function zoomResistorView(factor,pointX,pointY){
+ const diagram=$(kind+'-diagram');
+ if(!diagram.clientWidth||!diagram.clientHeight)return;
+ ensureResistorView();
+ const x=Number.isFinite(pointX)?pointX:diagram.clientWidth/2;
+ const y=Number.isFinite(pointY)?pointY:diagram.clientHeight/2;
+ const next=Math.max(resistorViewMinZoom,Math.min(resistorViewMaxZoom,resistorView.scale*factor));
+ const ratio=next/resistorView.scale;
+ resistorView.x=x-(x-resistorView.x)*ratio;
+ resistorView.y=y-(y-resistorView.y)*ratio;
+ resistorView.scale=next;
+ applyResistorView();
+}
+function initResistorView(){
+ const diagram=$(kind+'-diagram');
+ $(kind+'-zoom-in').addEventListener('click',()=>zoomResistorView(1.25));
+ $(kind+'-zoom-out').addEventListener('click',()=>zoomResistorView(.8));
+ $(kind+'-center').addEventListener('click',fitResistorView);
+ diagram.addEventListener('dblclick',event=>{event.preventDefault();fitResistorView();});
+ // Jedním prstem/myší posouváme. Dva prsty přibližují i oddalují.
+ // Souřadnice bodu mezi prsty zůstávají při změně měřítka na stejném místě schématu.
+ const pointers=resistorView.pointers;
+ const makeGesture=()=>{
+  const touches=[...pointers.values()];
+  const bounds=diagram.getBoundingClientRect();
+  if(touches.length>=2){
+   const a=touches[0],b=touches[1];
+   const centerX=(a.x+b.x)/2-bounds.left;
+   const centerY=(a.y+b.y)/2-bounds.top;
+   const distance=Math.max(1,Math.hypot(a.x-b.x,a.y-b.y));
+   resistorView.gesture={
+    mode:'pinch',distance,startScale:resistorView.scale,
+    worldX:(centerX-resistorView.x)/resistorView.scale,
+    worldY:(centerY-resistorView.y)/resistorView.scale
+   };
+  }else if(touches.length===1){
+   resistorView.gesture={
+    mode:'pan',startX:touches[0].x,startY:touches[0].y,
+    baseX:resistorView.x,baseY:resistorView.y
+   };
+  }else resistorView.gesture=null;
+  diagram.classList.toggle('dragging',touches.length>0);
+ };
+ diagram.addEventListener('pointerdown',event=>{
+  if(event.pointerType==='mouse'&&event.button!==0)return;
+  if(pointers.size>=2)return;
+  ensureResistorView();
+  pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+  try{diagram.setPointerCapture(event.pointerId)}catch(_){}
+  makeGesture();
+  event.preventDefault();
+ });
+ diagram.addEventListener('pointermove',event=>{
+  if(!pointers.has(event.pointerId))return;
+  pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+  const gesture=resistorView.gesture;
+  if(!gesture)return;
+  if(gesture.mode==='pan'&&pointers.size===1){
+   resistorView.x=gesture.baseX+event.clientX-gesture.startX;
+   resistorView.y=gesture.baseY+event.clientY-gesture.startY;
+  }else if(gesture.mode==='pinch'&&pointers.size>=2){
+   const [a,b]=[...pointers.values()];
+   const bounds=diagram.getBoundingClientRect();
+   const midpointX=(a.x+b.x)/2-bounds.left;
+   const midpointY=(a.y+b.y)/2-bounds.top;
+   const distance=Math.max(1,Math.hypot(a.x-b.x,a.y-b.y));
+   const scale=Math.max(resistorViewMinZoom,Math.min(resistorViewMaxZoom,gesture.startScale*distance/gesture.distance));
+   resistorView.scale=scale;
+   resistorView.x=midpointX-gesture.worldX*scale;
+   resistorView.y=midpointY-gesture.worldY*scale;
+  }
+  applyResistorView();
+  event.preventDefault();
+ });
+ const stopPointer=event=>{
+  if(!pointers.has(event.pointerId))return;
+  pointers.delete(event.pointerId);
+  try{if(diagram.hasPointerCapture(event.pointerId))diagram.releasePointerCapture(event.pointerId)}catch(_){}
+  makeGesture();
+ };
+ diagram.addEventListener('pointerup',stopPointer);
+ diagram.addEventListener('pointercancel',stopPointer);
+ diagram.addEventListener('lostpointercapture',stopPointer);
+ diagram.addEventListener('wheel',event=>{
+  if(!event.ctrlKey)return;
+  event.preventDefault();
+  const rect=diagram.getBoundingClientRect();
+  zoomResistorView(event.deltaY<0?1.15:1/1.15,event.clientX-rect.left,event.clientY-rect.top);
+ },{passive:false});
+ diagram.addEventListener('keydown',event=>{
+  if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){
+   const distance=50;
+   if(event.key==='ArrowLeft')resistorView.x+=distance;
+   if(event.key==='ArrowRight')resistorView.x-=distance;
+   if(event.key==='ArrowUp')resistorView.y+=distance;
+   if(event.key==='ArrowDown')resistorView.y-=distance;
+   event.preventDefault();
+   ensureResistorView();
+   applyResistorView();
+  }else if(event.key==='+'||event.key==='='){
+   event.preventDefault();zoomResistorView(1.25);
+  }else if(event.key==='-'||event.key==='_'){
+   event.preventDefault();zoomResistorView(.8);
+  }else if(event.key==='Home'||event.key==='0'){
+   event.preventDefault();fitResistorView();
+  }
+ });
+ window.addEventListener('resize',()=>{if(resistorView.ready)applyResistorView();});
+}
+
+
+initResistorView();
+return {ensure:ensureResistorView,fit:fitResistorView};
+}
+
+function reactiveDrawSvg(kind,blocks){
+ const svg=$(kind+'-diagram-svg'),ns='http://www.w3.org/2000/svg';
+ svg.replaceChildren();
+ const maxBranches=Math.max(1,...blocks.filter(b=>b.type==='parallel').map(b=>b.values.length));
+ const centerY=154+(maxBranches-1)*39;
+ const height=Math.max(304,centerY+(maxBranches-1)*39+86);
+ let cursor=68,serial=0,layouts=[];
+ for(const b of blocks){
+  const width=b.type==='series'?Math.max(164,54+b.values.length*112):258;
+  layouts.push({block:b,start:cursor,end:cursor+width});
+  cursor+=width+46;
+ }
+ const width=cursor+17,last=layouts[layouts.length-1].end;
+ svg.setAttribute('viewBox','0 0 '+width+' '+height);
+ svg.setAttribute('width',String(width));svg.setAttribute('height',String(height));
+ svg.style.width=width+'px';svg.style.height=height+'px';
+ const add=(tag,attrs,textValue)=>{
+  const n=document.createElementNS(ns,tag);
+  for(const [key,v] of Object.entries(attrs))n.setAttribute(key,String(v));
+  if(textValue!==undefined)n.textContent=textValue;
+  svg.append(n);return n;
+ };
+ const line=(x1,y1,x2,y2)=>add('line',{x1,y1,x2,y2,class:'rb-wire'});
+ const dot=(x,y)=>add('circle',{cx:x,cy:y,r:4,class:'rb-node'});
+ const label=(x,y,value,cls)=>add('text',{x,y,'text-anchor':'middle',class:cls},value);
+ const resistor=(x,y,value,isBranch)=>{
+  serial++;
+  const prefix=kind==='capacitors'?'C':'L',cls='rb-react-symbol'+(isBranch?' branch':'');
+  if(kind==='capacitors'){
+   line(x-36,y,x-12,y);
+   add('line',{x1:x-12,y1:y-18,x2:x-12,y2:y+18,class:cls});
+   add('line',{x1:x+12,y1:y-18,x2:x+12,y2:y+18,class:cls});
+   line(x+12,y,x+36,y);
+  }else{
+   line(x-36,y,x-26,y);
+   const path=['M '+(x-26)+' '+y];
+   for(let i=0;i<4;i++){
+    const q=x-26+i*13;
+    path.push('C '+(q+2)+' '+(y-23)+' '+(q+11)+' '+(y-23)+' '+(q+13)+' '+y);
+   }
+   add('path',{d:path.join(' '),class:cls});
+   line(x+26,y,x+36,y);
+  }
+  label(x,y-32,prefix+serial,'rb-label');
+  label(x,y+40,Number.isFinite(value)&&value>0?pretty(value,prefix):'?','rb-value');
+ };
+ dot(24,centerY);label(24,centerY-16,'A','rb-terminal');
+ let before=24;
+ layouts.forEach(({block,start,end},i)=>{
+  line(before,centerY,start,centerY);
+  label((start+end)/2,56,(i+1)+'. '+(block.type==='series'?'SÉRIOVÁ':'PARALELNÍ'),block.type==='series'?'rb-title':'rb-title branch');
+  if(block.type==='series'){
+   const step=(end-start-50)/block.values.length;
+   let from=start;
+   block.values.forEach((value,index)=>{
+    const x=start+25+step*(index+.5);
+    line(from,centerY,x-36,centerY);
+    resistor(x,centerY,value,false);
+    from=x+36;
+   });
+   line(from,centerY,end,centerY);
+  }else{
+   const left=start+25,right=end-25,center=(left+right)/2;
+   const rows=block.values.map((_,j)=>centerY+(j-(block.values.length-1)/2)*78);
+   line(start,centerY,left,centerY);
+   line(left,rows[0],left,rows[rows.length-1]);
+   line(right,rows[0],right,rows[rows.length-1]);
+   block.values.forEach((value,j)=>{
+    const y=rows[j];
+    line(left,y,center-36,y);
+    resistor(center,y,value,true);
+    line(center+36,y,right,y);
+    dot(left,y);dot(right,y);
+   });
+   line(right,centerY,end,centerY);
+  }
+  before=end;
+ });
+ const terminal=last+42;
+ line(last,centerY,terminal,centerY);
+ dot(terminal,centerY);label(terminal,centerY-16,'B','rb-terminal');
+ const description=blocks.map((b,i)=>(i+1)+'. '+(b.type==='series'?'sériová':'paralelní')+' část ('+b.values.length+' rezistorů)').join(', ');
+ svg.setAttribute('aria-label','Obvod mezi A a B: '+description+'. Části jsou navzájem zapojené v sérii.');
+ reactiveViews[kind]?.ensure();
+}
+
+
+const reactiveBuilders={
+ capacitors:{symbol:'C',nextId:2,blocks:[{id:1,type:'series',parts:[{value:'100',unit:1e-9}]}]},
+ inductors:{symbol:'L',nextId:2,blocks:[{id:1,type:'series',parts:[{value:'10',unit:1e-3}]}]}
+};
+const reactiveViews={};
+function reactiveHarmonic(values){
+ const minimum=Math.min(...values);
+ return minimum/values.reduce((acc,v)=>acc+minimum/v,0);
+}
+function reactiveEquivalent(kind,blocks){
+ if(!['capacitors','inductors'].includes(kind)||!Array.isArray(blocks)||!blocks.length)return null;
+ const cap=kind==='capacitors';let count=0;const details=[];
+ for(const block of blocks){
+  if(!block||!['series','parallel'].includes(block.type)||!Array.isArray(block.values)||!block.values.length)return null;
+  if(block.values.some(v=>!Number.isFinite(v)||v<=0))return null;
+  const harmonic=cap?block.type==='series':block.type==='parallel';
+  const value=harmonic?reactiveHarmonic(block.values):block.values.reduce((a,b)=>a+b,0);
+  if(!Number.isFinite(value)||value<=0)return null;
+  count+=block.values.length;details.push({type:block.type,value,count:block.values.length});
+ }
+ const total=cap?reactiveHarmonic(details.map(d=>d.value)):details.reduce((sum,d)=>sum+d.value,0);
+ if(!Number.isFinite(total)||total<=0)return null;
+ return {total,count,details};
+}
+function reactiveBlocks(kind){
+ return reactiveBuilders[kind].blocks.map(b=>({type:b.type,values:b.parts.map(p=>parse(p.value)*p.unit)}));
+}
+function reactiveCalculate(kind){
+ const blocks=reactiveBlocks(kind);reactiveDrawSvg(kind,blocks);
+ const result=reactiveEquivalent(kind,blocks);
+ if(!result){fail(kind+'-result','Zadej platné kladné hodnoty všech součástek. Prázdné, nulové a záporné hodnoty nelze použít.');return}
+ const symbol=reactiveBuilders[kind].symbol,cap=kind==='capacitors';
+ const metrics=[metric(cap?'Celková kapacita A–B':'Celková indukčnost A–B',pretty(result.total,symbol),true,true),
+  metric('Počet částí',String(blocks.length)),metric(cap?'Počet kondenzátorů':'Počet cívek',String(result.count))];
+ result.details.forEach((b,i)=>metrics.push(metric('Část '+(i+1)+' · '+(b.type==='series'?'sériová':'paralelní'),pretty(b.value,symbol))));
+ show(kind+'-result',metrics);
+}
+function reactiveInput(kind,block,index,number,part){
+ const symbol=reactiveBuilders[kind].symbol;
+ const item=document.createElement('div');item.className='res-builder-item';
+ const field=document.createElement('label');field.className='field';
+ const title=document.createElement('span');title.textContent=(symbol==='C'?'Kondenzátor ':'Cívka ')+symbol+number;
+ const control=document.createElement('div');control.className='control';
+ const input=document.createElement('input');input.type='text';input.inputMode='decimal';input.autocomplete='off';
+ input.className='with-unit';input.id=kind+'-part-'+block.id+'-'+index;input.value=part.value;
+ input.setAttribute('aria-label','Hodnota '+symbol+number);
+ const select=document.createElement('select');select.id=input.id+'-unit';select.className='unit-choice';
+ select.setAttribute('aria-label','Jednotka '+symbol+number);
+ for(const [name,factor] of units[symbol]){
+  const option=document.createElement('option');option.value=String(factor);option.textContent=name;select.append(option);
+ }
+ select.value=String(part.unit);
+ input.addEventListener('input',()=>{part.value=input.value;reactiveCalculate(kind)});
+ select.addEventListener('change',()=>{
+  const before=part.unit,after=Number(select.value),num=parse(input.value);
+  if(Number.isFinite(num)&&after>0){
+   const converted=num*before/after;
+   if(Number.isFinite(converted))input.value=editableNumber(converted);
+  }
+  part.unit=after;part.value=input.value;reactiveCalculate(kind);
+ });
+ control.append(input,select);field.append(title,control);item.append(field);
+ enhanceCustomSelect(select);return item;
+}
+function reactiveRender(kind){
+ const state=reactiveBuilders[kind],frag=document.createDocumentFragment();
+ let serial=1;
+ state.blocks.forEach((block,i)=>{
+  const group=document.createElement('div');group.className='res-builder-group'+(block.type==='parallel'?' res-builder-parallel':'');
+  const header=document.createElement('div');header.className='res-builder-header';
+  const heading=document.createElement('div');
+  const kicker=document.createElement('span');kicker.className='res-builder-kicker';
+  kicker.textContent=String(i+1).padStart(2,'0')+' / '+(block.type==='series'?'SÉRIOVÁ ČÁST':'PARALELNÍ ČÁST');
+  const title=document.createElement('h3');title.textContent=(block.type==='series'?'🔗 Sériové ':'🔀 Paralelní ')+(kind==='capacitors'?'kondenzátory':'cívky');
+  heading.append(kicker,title);
+  const badge=document.createElement('span');badge.className='res-builder-badge';
+  const n=block.parts.length;
+  badge.textContent=n+' '+(kind==='capacitors'?(n===1?'kondenzátor':n<5?'kondenzátory':'kondenzátorů'):(n===1?'cívka':n<5?'cívky':'cívek'));
+  header.append(heading,badge);
+  const desc=document.createElement('p');desc.className='res-builder-desc';
+  desc.textContent=block.type==='series'?'Součástky ve společné sériové větvi.':'Součástky mezi dvěma společnými uzly, v samostatných větvích.';
+  const toolbar=document.createElement('div');toolbar.className='res-builder-toolbar';
+  const actions=document.createElement('div');actions.className='res-builder-toolbar-actions';
+  actions.append(
+   resistorBuildButton('− Odebrat','','Odebrat součástku v části '+(i+1),()=>reactiveAdjust(kind,block.id,-1),block.parts.length<=1),
+   resistorBuildButton('+ Přidat','res-builder-add','Přidat součástku do části '+(i+1),()=>reactiveAdjust(kind,block.id,1),block.parts.length>=resistorMaxPerSection)
+  );toolbar.append(actions);
+  const fields=document.createElement('div');fields.className='res-builder-rows';
+  block.parts.forEach((part,index)=>fields.append(reactiveInput(kind,block,index,serial++,part)));
+  const buttons=document.createElement('div');buttons.className='res-builder-block-actions';
+  buttons.append(
+   resistorBuildButton('↑ Nahoru','','Přesunout část nahoru',()=>reactiveMove(kind,block.id,-1),i===0),
+   resistorBuildButton('↓ Dolů','','Přesunout část dolů',()=>reactiveMove(kind,block.id,1),i===state.blocks.length-1),
+   resistorBuildButton('× Smazat část','res-builder-delete','Smazat část '+(i+1),()=>reactiveDelete(kind,block.id),state.blocks.length===1)
+  );
+  group.append(header,desc,toolbar,fields,buttons);frag.append(group);
+ });
+ $(kind+'-builder-blocks').replaceChildren(frag);
+ $(kind+'-add-series').disabled=state.blocks.length>=resistorMaxSections;
+ $(kind+'-add-parallel').disabled=state.blocks.length>=resistorMaxSections;
+ reactiveCalculate(kind);
+}
+function reactiveAdjust(kind,id,dir){
+ const b=reactiveBuilders[kind].blocks.find(x=>x.id===id);
+ if(!b)return;
+ if(dir>0&&b.parts.length<resistorMaxPerSection)b.parts.push({value:kind==='capacitors'?'100':'10',unit:kind==='capacitors'?1e-9:1e-3});
+ else if(dir<0&&b.parts.length>1)b.parts.pop();
+ else return;
+ reactiveRender(kind);
+}
+function reactiveAdd(kind,type){
+ const state=reactiveBuilders[kind];
+ if(state.blocks.length>=resistorMaxSections||!['series','parallel'].includes(type))return;
+ const part=()=>({value:kind==='capacitors'?'100':'10',unit:kind==='capacitors'?1e-9:1e-3});
+ state.blocks.push({id:state.nextId++,type,parts:type==='parallel'?[part(),part()]:[part()]});
+ reactiveRender(kind);
+}
+function reactiveDelete(kind,id){
+ const blocks=reactiveBuilders[kind].blocks;
+ if(blocks.length<=1)return;
+ const i=blocks.findIndex(b=>b.id===id);
+ if(i<0)return;
+ blocks.splice(i,1);reactiveRender(kind);
+}
+function reactiveMove(kind,id,offset){
+ const blocks=reactiveBuilders[kind].blocks;
+ const i=blocks.findIndex(b=>b.id===id),j=i+offset;
+ if(i<0||j<0||j>=blocks.length)return;
+ [blocks[i],blocks[j]]=[blocks[j],blocks[i]];
+ reactiveRender(kind);
+}
+function initReactiveBuilders(){
+ for(const kind of ['capacitors','inductors']){
+  $(kind+'-add-series').addEventListener('click',()=>reactiveAdd(kind,'series'));
+  $(kind+'-add-parallel').addEventListener('click',()=>reactiveAdd(kind,'parallel'));
+  reactiveViews[kind]=createReactiveView(kind);
+  reactiveRender(kind);
+ }
+}
 
 /* v3.0: libovolně řazené sériové a paralelní bloky. Bloky mezi sebou v sérii. */
 const resistorMaxSections=20,resistorMaxPerSection=60;
@@ -1294,71 +1707,6 @@ function initResistorBuilder(){
  $('res-add-series').addEventListener('click',()=>addResistorBlock('series'));
  $('res-add-parallel').addEventListener('click',()=>addResistorBlock('parallel'));
  renderResistorBuilder();
-}
-
-/* Schémata kondenzátorů a cívek; mění se podle počtu skutečně zadaných prvků. */
-function reactiveCircuitSvg(type,kind,count){
- const n=Math.min(3,Math.max(1,count));
- const ns='http://www.w3.org/2000/svg';
- const svg=document.createElementNS(ns,'svg');
- svg.setAttribute('viewBox','0 0 180 102');
- svg.setAttribute('class','circuit-svg reactive-schematic');
- svg.setAttribute('role','img');
- svg.setAttribute('aria-label',(kind==='series'?'Sériové':'Paralelní')+' schéma '+n+' '+(type==='C'?'kondenzátorů':'cívek'));
- const wire=(x1,y1,x2,y2)=>`<path class="circuit-wire" d="M${x1} ${y1} L${x2} ${y2}"/>`;
- const dot=(x,y)=>`<circle cx="${x}" cy="${y}" r="3.5" class="circuit-node"/>`;
- function symbol(x,y,i){
-  const label=kind==='parallel'?`<text x="${x+46}" y="${y-7}" aria-hidden="true">${type}${i+1}</text>`:`<text x="${x}" y="${y+25}" aria-hidden="true">${type}${i+1}</text>`;
-  if(type==='C') return wire(x-15,y,x-6,y)+`<path class="circuit-wire" d="M${x-6} ${y-12} V${y+12} M${x+6} ${y-12} V${y+12}"/>`+wire(x+6,y,x+15,y)+label;
-  return `<path class="circuit-wire" d="M${x-16} ${y} Q${x-11} ${y-15} ${x-6} ${y} Q${x-1} ${y-15} ${x+4} ${y} Q${x+9} ${y-15} ${x+14} ${y}"/>`+wire(x+14,y,x+16,y)+label;
- }
- const parts=[];
- if(kind==='series'){
-  const xs=n===1?[90]:n===2?[58,122]:[39,90,141];
-  let from=10;
-  xs.forEach((x,i)=>{parts.push(wire(from,48,x-16,48),symbol(x,48,i));from=x+16});
-  parts.push(wire(from,48,170,48),dot(10,48),dot(170,48));
- }else{
-  const rows=n===1?[48]:n===2?[31,69]:[21,49,77];
-  parts.push(wire(12,rows[0],12,rows[rows.length-1]),wire(168,rows[0],168,rows[rows.length-1]));
-  rows.forEach((y,i)=>{parts.push(wire(12,y,74,y),symbol(90,y,i),wire(106,y,168,y));});
-  if(n>1){parts.push(wire(4,48,12,48),wire(168,48,176,48));}
-  parts.push(dot(n>1?4:12,48),dot(n>1?176:168,48));
- }
- svg.innerHTML=parts.join('');
- return svg;
-}
-function reactiveMetric(label,value,type,kind,count){
- const card=metric(label,value,true);
- card.classList.add('has-circuit');
- const copy=document.createElement('div');copy.className='metric-copy';
- while(card.firstChild)copy.append(card.firstChild);
- card.append(copy,reactiveCircuitSvg(type,kind,count));
- return card;
-}
-function calcReactive(kind){
- const cap=kind==='capacitors';
- const ids=cap?['c1','c2','c3']:['l1','l2','l3'];
- const vals=ids.filter(id=>$(id).value.trim()!=='').map(siInput);
- const target=kind+'-result';
- if(!vals.length||vals.some(v=>!Number.isFinite(v)||v<=0)){
-  fail(target,'Zadej alespoň jednu kladnou hodnotu větší než nula.');return;
- }
- const sum=vals.reduce((s,v)=>s+v,0);
- // Numericky stabilnější harmonický součet pro malé i velké hodnoty:
- const minimum=Math.min(...vals);
- const reciprocal=minimum/vals.reduce((s,v)=>s+minimum/v,0);
- const series=cap?reciprocal:sum;
- const parallel=cap?sum:reciprocal;
- if(!Number.isFinite(series)||!Number.isFinite(parallel)||series<=0||parallel<=0){
-  fail(target,'Hodnoty jsou mimo rozsah výpočtu.');return;
- }
- const letter=cap?'C':'L';
- show(target,[
-  reactiveMetric('Sériové zapojení',pretty(series,letter),letter,'series',vals.length),
-  reactiveMetric('Paralelní zapojení',pretty(parallel,letter),letter,'parallel',vals.length),
-  metric(cap?'Počet kondenzátorů':'Počet cívek',String(vals.length),false,true)
- ]);
 }
 
 const colors=[['Černá','#22252b'],['Hnědá','#704421'],['Červená','#c63232'],['Oranžová','#e57820'],['Žlutá','#ecd53f'],['Zelená','#388e52'],['Modrá','#297cc3'],['Fialová','#873fac'],['Šedá','#8d98a0'],['Bílá','#f6f6f4']];
@@ -1943,10 +2291,11 @@ $('tool-picker').addEventListener('change',()=>{
  const selected=$('tool-picker').value;
  for(const panel of document.querySelectorAll('.panel'))panel.classList.toggle('active',panel.id===selected);
  if(selected==='resistors')ensureResistorView();
+ if(selected==='capacitors'||selected==='inductors')reactiveViews[selected]?.ensure();
  window.scrollTo(0,0);
 });
-$('ohm-target').addEventListener('change',updateOhmTarget);for(const id of ['ohm-input-1','ohm-input-2','ohm-input-3'])$(id).addEventListener('input',calcOhm);for(const id of ['b1','b2','b3','b4','b5','b6'])$(id).addEventListener('change',()=>calcBands());$('band-count').addEventListener('change',updateBandCount);$('target-resistance').addEventListener('input',applyResistanceToBands);$('target-unit').addEventListener('change',applyResistanceToBands);for(const id of ['du','dr1','dr2'])$(id).addEventListener('input',calcDivider);for(const id of ['ep','eh','ed','ec'])$(id).addEventListener('input',calcEnergy);for(const id of ['c1','c2','c3'])$(id).addEventListener('input',()=>calcReactive('capacitors'));for(const id of ['l1','l2','l3'])$(id).addEventListener('input',()=>calcReactive('inductors'));
-setupInputUnits();updateOhmTarget();initBands();calcDivider();calcEnergy();calcReactive('capacitors');calcReactive('inductors');
+$('ohm-target').addEventListener('change',updateOhmTarget);for(const id of ['ohm-input-1','ohm-input-2','ohm-input-3'])$(id).addEventListener('input',calcOhm);for(const id of ['b1','b2','b3','b4','b5','b6'])$(id).addEventListener('change',()=>calcBands());$('band-count').addEventListener('change',updateBandCount);$('target-resistance').addEventListener('input',applyResistanceToBands);$('target-unit').addEventListener('change',applyResistanceToBands);for(const id of ['du','dr1','dr2'])$(id).addEventListener('input',calcDivider);for(const id of ['ep','eh','ed','ec'])$(id).addEventListener('input',calcEnergy);
+setupInputUnits();updateOhmTarget();initBands();calcDivider();calcEnergy();
 
 // Custom offline-friendly modal selects (Android/iOS/desktop).
 const pickerOverlay=$('picker-overlay'),pickerTitle=$('picker-title'),pickerOptions=$('picker-options'),pickerSearch=$('picker-search'),pickerSearchInput=$('picker-search-input');
@@ -2058,6 +2407,7 @@ document.addEventListener('keydown',e=>{
 initCustomSelects();
 initResistorBuilder();
 initResistorView();
+initReactiveBuilders();
 initSmd();
 initCeramic();
 initNewCalculators();
