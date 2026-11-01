@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a1326">
 <meta name="description" content="Elektrotechnická kalkulačka Veselá kozenka – Ohmův zákon, rezistory, barevné proužky, SMD kódy, keramické kondenzátory, baterie, vodiče, transformátory, blikání LED, dělič napětí a spotřeba elektřiny.">
-<title>Elektrotechnická kalkulačka Veselá kozenka · v2.8.2</title>
+<title>Elektrotechnická kalkulačka Veselá kozenka · v2.9</title>
 <link rel="icon" type="image/png" sizes="48x48" href="./favicon-48.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -247,6 +247,44 @@ body.picker-open{overflow:hidden}
 .battery-explanation{color:#a9c4d3;margin:8px 0 0;font-size:12px;line-height:1.55}
 @media(max-width:440px){.battery-advanced-body .fields{grid-template-columns:1fr}.battery-advanced-summary{padding:13px 42px 13px 13px}.battery-advanced-body{padding:13px}}
 
+
+/* v2.9 dynamická série + paralelní skupina */
+.res-builder-group{border:1px solid #365a70;border-radius:16px;background:linear-gradient(135deg,#142b3e,#102238);padding:16px;margin-top:16px}
+.res-builder-header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.res-builder-header h3{font-size:17px;color:#f0f7ff;margin:5px 0 0}
+.res-builder-kicker{font-size:11px;letter-spacing:.08em;color:#69e8ce;font-weight:800}
+.res-builder-badge{font-size:12px;color:#a0f4df;border:1px solid #3b7c76;background:#143e40;padding:6px 8px;border-radius:9px;white-space:nowrap;font-weight:700}
+.res-builder-desc{font-size:12px;color:#b5cbdb;line-height:1.55;margin:12px 0}
+.res-builder-controls{display:grid;grid-template-columns:minmax(100px,1fr) auto auto;gap:8px;align-items:end;margin:12px 0 15px}
+.res-builder-controls>.field{max-width:180px}
+.res-builder-controls .control input{height:44px;padding:9px 12px}
+.res-builder-button{border:1px solid #496f85;border-radius:11px;background:#18364a;color:#e1f3ff;padding:8px 11px;min-height:44px;font-size:13px;font-weight:750;cursor:pointer;white-space:nowrap}
+.res-builder-button:disabled{opacity:.4;cursor:default}
+.res-builder-button:focus-visible{outline:2px solid #73e9d0;outline-offset:2px}
+.res-builder-add{border-color:#409d8d;background:#175148;color:#9fffe5}
+.res-builder-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.res-builder-item{background:#101f35;border:1px solid #38516b;border-radius:13px;padding:11px;min-width:0}
+.res-builder-item .field>span{font-weight:700}
+.res-builder-item .control input{height:48px}
+.res-builder-item .control input.with-unit{padding-right:92px}
+.res-builder-empty{font-size:12px;color:#bfd3e1;padding:14px;margin:0;border:1px dashed #48677a;border-radius:12px}
+.res-builder-empty[hidden]{display:none}
+.res-builder-diagram{border:1px solid #416579;border-radius:15px;background:radial-gradient(ellipse at center,#183549,#0e1e31);overflow:auto;max-height:410px;scrollbar-color:#4a858a #102235;overscroll-behavior:contain;padding:5px}
+.res-builder-diagram:focus-visible{outline:2px solid #61e7ce;outline-offset:2px}
+.res-builder-diagram svg{display:block;max-width:none}
+.res-builder-diagram .rb-wire{fill:none;stroke:#8ce9da;stroke-width:3;stroke-linecap:round}
+.res-builder-diagram .rb-resistor{fill:#1c4152;stroke:#83edd9;stroke-width:2.2}
+.res-builder-diagram .rb-resistor.branch{fill:#47344b;stroke:#eab7ff}
+.res-builder-diagram .rb-node{fill:#90eee1}
+.res-builder-diagram .rb-label{fill:#ebfcf9;font:800 15px system-ui,-apple-system,sans-serif}
+.res-builder-diagram .rb-value{fill:#a4c6d7;font:700 13px system-ui,-apple-system,sans-serif}
+.res-builder-diagram .rb-title{fill:#67dfca;font:850 13px system-ui,-apple-system,sans-serif}
+.res-builder-diagram .rb-title.branch{fill:#e3b0fa}
+.res-builder-diagram .rb-terminal{fill:#eefaff;font:800 13px system-ui,-apple-system,sans-serif}
+.res-builder-diagram-help{color:#a9c8d6;font-size:12px;line-height:1.5;margin:10px 0 18px}
+.res-builder-result-heading{margin-top:17px}
+@media(max-width:480px){.res-builder-rows{grid-template-columns:1fr}.res-builder-controls{grid-template-columns:1fr 1fr}.res-builder-controls>.field{grid-column:1/-1;max-width:none}.res-builder-group{padding:13px}.res-builder-header h3{font-size:15px}.res-builder-badge{font-size:11px}}
+
 </style>
 </head>
 <body>
@@ -293,7 +331,43 @@ body.picker-open{overflow:hidden}
  </div>
  <div class="card"><div class="result-label">Vypočítané hodnoty</div><div id="ohm-result" class="result-grid" aria-live="polite"></div><div class="formula">Základní vztahy: <code>U = R × I</code> &nbsp;·&nbsp; <code>P = U × I</code></div></div>
 </section>
- <section class="panel" id="resistors" aria-label="Skládání rezistoru"><div class="card"><h2>Sériové a paralelní zapojení</h2><p class="sub">Zadej hodnoty až tří rezistorů. U každého můžeš zvolit vlastní jednotku.</p><div class="fields three"><label class="field"><span>Rezistor R₁</span><div class="control"><input id="r1" type="text" inputmode="decimal" value="100"><span class="unit">Ω</span></div></label><label class="field"><span>Rezistor R₂</span><div class="control"><input id="r2" type="text" inputmode="decimal" value="220"><span class="unit">Ω</span></div></label><label class="field"><span>Rezistor R₃</span><div class="control"><input id="r3" type="text" inputmode="decimal" placeholder="Volitelné"><span class="unit">Ω</span></div></label></div></div><div class="card"><div class="result-label">Výsledný odpor</div><div id="resistors-result" class="result-grid" aria-live="polite"></div><p class="helper">Sériově se odpory sčítají. Paralelně platí 1/R = 1/R₁ + 1/R₂ + …</p></div></section>
+ <section class="panel" id="resistors" aria-label="Skládání rezistorů">
+ <div class="card">
+  <h2>Vlastní zapojení rezistorů</h2>
+  <p class="sub">Sestav obvod: nejdřív rezistory v sérii, za ně můžeš připojit paralelní skupinu. Obrázek i celkový odpor se přepočítávají automaticky.</p>
+  <div class="res-builder-group">
+   <div class="res-builder-header"><div><span class="res-builder-kicker">01 / SÉRIOVÁ ČÁST</span><h3>🔗 Sériové rezistory</h3></div><span class="res-builder-badge" id="res-series-label">1 rezistor</span></div>
+   <p class="res-builder-desc">Rezistory zapojené za sebou. Jejich odpory se sčítají.</p>
+   <div class="res-builder-controls">
+    <label class="field"><span>Počet rezistorů</span><div class="control"><input id="res-series-count" type="number" inputmode="numeric" min="1" max="60" step="1" value="1"></div></label>
+    <button type="button" class="res-builder-button" id="res-series-minus" aria-label="Odebrat sériový rezistor">− Odebrat</button>
+    <button type="button" class="res-builder-button res-builder-add" id="res-series-plus" aria-label="Přidat sériový rezistor">+ Přidat</button>
+   </div>
+   <div class="res-builder-rows" id="res-series-rows"></div>
+  </div>
+  <div class="res-builder-group">
+   <div class="res-builder-header"><div><span class="res-builder-kicker">02 / VOLITELNÁ ČÁST</span><h3>🔀 Paralelní rezistory</h3></div><span class="res-builder-badge" id="res-parallel-label">Nepřidáno</span></div>
+   <p class="res-builder-desc">Paralelní skupinu zapojíme za sériové rezistory. Jednotlivé větve sdílejí společné dva uzly.</p>
+   <div class="res-builder-controls">
+    <label class="field"><span>Počet větví</span><div class="control"><input id="res-parallel-count" type="number" inputmode="numeric" min="0" max="60" step="1" value="0"></div></label>
+    <button type="button" class="res-builder-button" id="res-parallel-minus" aria-label="Odebrat paralelní rezistor" disabled>− Odebrat</button>
+    <button type="button" class="res-builder-button res-builder-add" id="res-parallel-plus" aria-label="Přidat paralelní rezistor">+ Přidat</button>
+   </div>
+   <div class="res-builder-rows" id="res-parallel-rows"></div>
+   <p class="res-builder-empty" id="res-parallel-empty">Zatím žádná paralelní větev. Klepni na <strong>+ Přidat</strong>, pokud ji chceš použít.</p>
+  </div>
+ </div>
+ <div class="card">
+  <div class="result-label">Schéma zapojení</div>
+  <div class="res-builder-diagram" id="res-diagram" tabindex="0" role="region" aria-label="Posuvné schéma zapojení rezistorů">
+   <svg id="res-diagram-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Obvod rezistorů"></svg>
+  </div>
+  <p class="res-builder-diagram-help">Schéma se mění podle počtu a hodnot rezistorů. Větší zapojení můžeš posouvat prstem nebo myší.</p>
+  <div class="result-label res-builder-result-heading">Výsledný odpor</div>
+  <div id="resistors-result" class="result-grid" aria-live="polite"></div>
+  <p class="helper">Celkový odpor = součet sériových rezistorů + ekvivalentní odpor paralelní skupiny. Je-li paralelní skupina prázdná, počítá se jen sériová část.</p>
+ </div>
+</section>
  
 <section id="capacitors" class="panel" aria-label="Skládání kondenzátorů">
   <div class="card">
@@ -658,7 +732,7 @@ body.picker-open{overflow:hidden}
  </div>
 </section>
 
- <footer class="footer">🐐 Veselá kozenka · v2.8.2</footer>
+ <footer class="footer">🐐 Veselá kozenka · v2.9</footer>
 </main>
 <div class="picker-overlay" id="picker-overlay" hidden>
  <div class="picker-dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
@@ -683,8 +757,8 @@ function fail(id,message){const el=document.createElement('p');el.className='err
 const labels={U:['Napětí U','V'],I:['Proud I','A'],R:['Odpor R','Ω'],P:['Výkon P','W']};
 const defaults={U:12,I:2,R:6,P:24};
 const ohmState={...defaults},ohmFactors={U:1,I:1,R:1,P:1};
-const unitInputs={"ohm-input-1":'I',"ohm-input-2":'R',"ohm-input-3":'P',"blink-ra":'R',"blink-rb":'R',r1:'R',r2:'R',r3:'R',du:'U',dr1:'R',dr2:'R',ep:'P',c1:'C',c2:'C',c3:'C',l1:'L',l2:'L',l3:'L'};
-const unitCalculators={'ohm-input-1':()=>calcOhm(),'ohm-input-2':()=>calcOhm(),'ohm-input-3':()=>calcOhm(),'blink-ra':()=>calcBlink(),'blink-rb':()=>calcBlink(),r1:()=>calcResistors(),r2:()=>calcResistors(),r3:()=>calcResistors(),du:()=>calcDivider(),dr1:()=>calcDivider(),dr2:()=>calcDivider(),ep:()=>calcEnergy(),c1:()=>calcReactive('capacitors'),c2:()=>calcReactive('capacitors'),c3:()=>calcReactive('capacitors'),l1:()=>calcReactive('inductors'),l2:()=>calcReactive('inductors'),l3:()=>calcReactive('inductors')};
+const unitInputs={"ohm-input-1":'I',"ohm-input-2":'R',"ohm-input-3":'P',"blink-ra":'R',"blink-rb":'R',du:'U',dr1:'R',dr2:'R',ep:'P',c1:'C',c2:'C',c3:'C',l1:'L',l2:'L',l3:'L'};
+const unitCalculators={'ohm-input-1':()=>calcOhm(),'ohm-input-2':()=>calcOhm(),'ohm-input-3':()=>calcOhm(),'blink-ra':()=>calcBlink(),'blink-rb':()=>calcBlink(),du:()=>calcDivider(),dr1:()=>calcDivider(),dr2:()=>calcDivider(),ep:()=>calcEnergy(),c1:()=>calcReactive('capacitors'),c2:()=>calcReactive('capacitors'),c3:()=>calcReactive('capacitors'),l1:()=>calcReactive('inductors'),l2:()=>calcReactive('inductors'),l3:()=>calcReactive('inductors')};
 function editableNumber(value){return String(Number(value.toPrecision(12)))}
 const inputDefaultUnits={"blink-ra":1000,"blink-rb":1000,c1:1e-9,c2:1e-9,c3:1e-9,l1:1e-3,l2:1e-3,l3:1e-3};
 function assignUnitOptions(select,key,factor=1){
@@ -815,12 +889,148 @@ function circuitMetric(name,value,kind,count){
  return card;
 }
 
+
+/* v2.9 – série následovaná paralelní skupinou, která je zapojená v sérii. */
+const resistorBuilderMax=60;
+const resistorBuilder={series:[{value:'100',unit:1}],parallel:[]};
+function resistorEquivalent(series,parallel){
+ if(!Array.isArray(series)||!Array.isArray(parallel)||!series.length)return null;
+ const all=series.concat(parallel);
+ if(all.some(value=>!Number.isFinite(value)||value<0))return null;
+ const seriesValue=series.reduce((a,b)=>a+b,0);
+ let parallelValue=null;
+ if(parallel.length){
+  if(parallel.includes(0))parallelValue=0;
+  else {const minimum=Math.min(...parallel);parallelValue=minimum/parallel.reduce((acc,value)=>acc+minimum/value,0);}
+ }
+ const total=seriesValue+(parallelValue===null?0:parallelValue);
+ if(!Number.isFinite(seriesValue)||!Number.isFinite(total)||(parallelValue!==null&&!Number.isFinite(parallelValue)))return null;
+ return {seriesValue,parallelValue,total};
+}
+function resistorBuilderValue(entry){return parse(entry.value)*entry.unit}
+function resistorCircuitSvg(series,parallel){
+ const svg=$('res-diagram-svg'),ns='http://www.w3.org/2000/svg';
+ svg.replaceChildren();
+ const parallelY=parallel.map((v,i)=>134+i*80);
+ const centerY=parallelY.length?(parallelY[0]+parallelY[parallelY.length-1])/2:140;
+ const firstX=126,spacing=151,seriesFinish=firstX+(series.length-1)*spacing+57;
+ const left=seriesFinish+103,right=left+254,last=parallel.length?right+75:seriesFinish+75;
+ const width=last+32,height=Math.max(265,parallelY.length?parallelY[parallelY.length-1]+85:265);
+ svg.setAttribute('viewBox','0 0 '+width+' '+height);
+ svg.setAttribute('width',String(width));svg.setAttribute('height',String(height));
+ svg.style.width=width+'px';svg.style.height=height+'px';
+ const element=(tag,attrs,value)=>{
+  const node=document.createElementNS(ns,tag);
+  for(const [key,v] of Object.entries(attrs))node.setAttribute(key,String(v));
+  if(value!==undefined)node.textContent=value;
+  svg.append(node);return node;
+ };
+ const line=(x1,y1,x2,y2)=>element('line',{x1,y1,x2,y2,class:'rb-wire'});
+ const dot=(x,y)=>element('circle',{cx:x,cy:y,r:4,class:'rb-node'});
+ const label=(x,y,t,cls)=>element('text',{x,y,'text-anchor':'middle',class:cls},t);
+ const part=(x,y,name,value,branch)=>{
+  element('rect',{x:x-38,y:y-17,width:76,height:34,rx:5,class:'rb-resistor'+(branch?' branch':'')});
+  label(x,y+5,name,'rb-label');
+  label(x,y+42,Number.isFinite(value)&&value>=0?pretty(value,'R'):'?','rb-value');
+ };
+ dot(27,centerY);label(27,centerY-16,'A','rb-terminal');
+ label(firstX+2,55,'SÉRIOVÁ ČÁST','rb-title');
+ let position=27;
+ series.forEach((v,i)=>{
+  const x=firstX+i*spacing;
+  line(position,centerY,x-38,centerY);
+  part(x,centerY,'S'+(i+1),v,false);
+  position=x+38;
+ });
+ line(position,centerY,seriesFinish,centerY);
+ if(parallel.length){
+  label((left+right)/2,55,'PARALELNÍ SKUPINA','rb-title branch');
+  line(seriesFinish,centerY,left,centerY);
+  line(left,parallelY[0],left,parallelY[parallelY.length-1]);
+  line(right,parallelY[0],right,parallelY[parallelY.length-1]);
+  const x=(left+right)/2;
+  parallel.forEach((v,i)=>{
+   const y=parallelY[i];
+   line(left,y,x-38,y);part(x,y,'P'+(i+1),v,true);line(x+38,y,right,y);
+   dot(left,y);dot(right,y);
+  });
+  line(right,centerY,last,centerY);
+ }else line(seriesFinish,centerY,last,centerY);
+ dot(last,centerY);label(last,centerY-16,'B','rb-terminal');
+ svg.setAttribute('aria-label','Zapojení mezi A a B: '+series.length+' rezistorů v sérii'+(parallel.length?' a '+parallel.length+' paralelních větví zapojených za nimi.':'.'));
+}
 function calcResistors(){
- const ids=['r1','r2','r3'];
- const list=ids.filter(id=>$(id).value.trim()!=='').map(siInput);
- if(!list.length||list.some(x=>!Number.isFinite(x)||x<0)){fail('resistors-result','Zadej alespoň jeden platný nezáporný odpor.');return}
- const series=list.reduce((a,b)=>a+b,0),parallel=list.includes(0)?0:1/list.reduce((a,b)=>a+1/b,0);
- show('resistors-result',[circuitMetric('Sériové zapojení',pretty(series,'R'),'series',list.length),circuitMetric('Paralelní zapojení',pretty(parallel,'R'),'parallel',list.length),metric('Počet rezistorů',String(list.length),false,true)]);
+ const series=resistorBuilder.series.map(resistorBuilderValue);
+ const parallel=resistorBuilder.parallel.map(resistorBuilderValue);
+ resistorCircuitSvg(series,parallel);
+ const r=resistorEquivalent(series,parallel);
+ if(!r){fail('resistors-result','Vyplň u všech rezistorů platný nezáporný odpor. Zkontroluj prázdné nebo záporné hodnoty.');return}
+ show('resistors-result',[
+  metric('Celkový odpor A–B',pretty(r.total,'R'),true,true),
+  metric('Sériová část',pretty(r.seriesValue,'R')),
+  metric('Paralelní skupina',parallel.length?pretty(r.parallelValue,'R'):'Nepřidáno'),
+  metric('Počet rezistorů',String(series.length+parallel.length),false,true)
+ ]);
+}
+function resistorInputRow(type,index,part){
+ const block=document.createElement('div');block.className='res-builder-item';
+ const field=document.createElement('label');field.className='field';
+ const title=document.createElement('span');
+ const mark=(type==='series'?'S':'P')+(index+1);
+ title.textContent='Rezistor '+mark;
+ const control=document.createElement('div');control.className='control';
+ const input=document.createElement('input');
+ input.id='res-'+type+'-'+(index+1);
+ input.type='text';input.inputMode='decimal';input.className='with-unit';
+ input.value=part.value;input.autocomplete='off';input.setAttribute('aria-label','Hodnota rezistoru '+mark);
+ const select=document.createElement('select');
+ select.id=input.id+'-unit';select.className='unit-choice';
+ select.setAttribute('aria-label','Jednotka rezistoru '+mark);
+ for(const [textValue,factor] of units.R){
+  const option=document.createElement('option');option.textContent=textValue;option.value=String(factor);select.append(option);
+ }
+ select.value=String(part.unit);
+ input.addEventListener('input',()=>{part.value=input.value;calcResistors()});
+ select.addEventListener('change',()=>{
+  const next=Number(select.value),current=part.unit,raw=parse(input.value);
+  if(Number.isFinite(raw)){
+   const converted=raw*current/next;
+   if(Number.isFinite(converted))input.value=editableNumber(converted);
+  }
+  part.unit=next;part.value=input.value;calcResistors();
+ });
+ control.append(input,select);field.append(title,control);block.append(field);
+ enhanceCustomSelect(select);
+ return block;
+}
+function renderResistorRows(type){
+ const list=resistorBuilder[type],target=$('res-'+type+'-rows');
+ const fragment=document.createDocumentFragment();
+ list.forEach((part,i)=>fragment.append(resistorInputRow(type,i,part)));
+ target.replaceChildren(fragment);
+ $('res-'+type+'-count').value=String(list.length);
+ $('res-'+type+'-minus').disabled=list.length<=(type==='series'?1:0);
+ $('res-'+type+'-plus').disabled=list.length>=resistorBuilderMax;
+ $('res-'+type+'-label').textContent=type==='parallel'&&!list.length?'Nepřidáno':list.length+' '+(list.length===1?'rezistor':list.length<5?'rezistory':'rezistorů');
+ if(type==='parallel')$('res-parallel-empty').hidden=list.length>0;
+}
+function setResistorCount(type,wanted){
+ const minimum=type==='series'?1:0,rows=resistorBuilder[type];
+ let count=Number(wanted);
+ if(!Number.isFinite(count))count=rows.length;
+ count=Math.max(minimum,Math.min(resistorBuilderMax,Math.floor(count)));
+ while(rows.length<count)rows.push({value:type==='series'?'100':'220',unit:1});
+ if(rows.length>count)rows.length=count;
+ renderResistorRows(type);calcResistors();
+}
+function initResistorBuilder(){
+ for(const type of ['series','parallel']){
+  $('res-'+type+'-plus').addEventListener('click',()=>setResistorCount(type,resistorBuilder[type].length+1));
+  $('res-'+type+'-minus').addEventListener('click',()=>setResistorCount(type,resistorBuilder[type].length-1));
+  $('res-'+type+'-count').addEventListener('change',()=>setResistorCount(type,$('res-'+type+'-count').value));
+  renderResistorRows(type);
+ }
+ calcResistors();
 }
 
 /* Schémata kondenzátorů a cívek; mění se podle počtu skutečně zadaných prvků. */
@@ -1471,8 +1681,8 @@ $('tool-picker').addEventListener('change',()=>{
  for(const panel of document.querySelectorAll('.panel'))panel.classList.toggle('active',panel.id===selected);
  window.scrollTo(0,0);
 });
-$('ohm-target').addEventListener('change',updateOhmTarget);for(const id of ['ohm-input-1','ohm-input-2','ohm-input-3'])$(id).addEventListener('input',calcOhm);for(const id of ['r1','r2','r3'])$(id).addEventListener('input',calcResistors);for(const id of ['b1','b2','b3','b4','b5','b6'])$(id).addEventListener('change',()=>calcBands());$('band-count').addEventListener('change',updateBandCount);$('target-resistance').addEventListener('input',applyResistanceToBands);$('target-unit').addEventListener('change',applyResistanceToBands);for(const id of ['du','dr1','dr2'])$(id).addEventListener('input',calcDivider);for(const id of ['ep','eh','ed','ec'])$(id).addEventListener('input',calcEnergy);for(const id of ['c1','c2','c3'])$(id).addEventListener('input',()=>calcReactive('capacitors'));for(const id of ['l1','l2','l3'])$(id).addEventListener('input',()=>calcReactive('inductors'));
-setupInputUnits();updateOhmTarget();calcResistors();initBands();calcDivider();calcEnergy();calcReactive('capacitors');calcReactive('inductors');
+$('ohm-target').addEventListener('change',updateOhmTarget);for(const id of ['ohm-input-1','ohm-input-2','ohm-input-3'])$(id).addEventListener('input',calcOhm);for(const id of ['b1','b2','b3','b4','b5','b6'])$(id).addEventListener('change',()=>calcBands());$('band-count').addEventListener('change',updateBandCount);$('target-resistance').addEventListener('input',applyResistanceToBands);$('target-unit').addEventListener('change',applyResistanceToBands);for(const id of ['du','dr1','dr2'])$(id).addEventListener('input',calcDivider);for(const id of ['ep','eh','ed','ec'])$(id).addEventListener('input',calcEnergy);for(const id of ['c1','c2','c3'])$(id).addEventListener('input',()=>calcReactive('capacitors'));for(const id of ['l1','l2','l3'])$(id).addEventListener('input',()=>calcReactive('inductors'));
+setupInputUnits();updateOhmTarget();initBands();calcDivider();calcEnergy();calcReactive('capacitors');calcReactive('inductors');
 
 // Custom offline-friendly modal selects (Android/iOS/desktop).
 const pickerOverlay=$('picker-overlay'),pickerTitle=$('picker-title'),pickerOptions=$('picker-options'),pickerSearch=$('picker-search'),pickerSearchInput=$('picker-search-input');
@@ -1550,20 +1760,22 @@ function openPicker(select,trigger){
   selectedItem?.scrollIntoView({block:'nearest'});
  }
 }
+function enhanceCustomSelect(select){
+ if(select.nextElementSibling?.classList.contains('select-trigger'))return;
+ const field=select.closest('.field');const label=field.querySelector(':scope > span')?.textContent || 'Výběr';
+ const trigger=document.createElement('button');trigger.type='button';trigger.className='select-trigger';
+ trigger.setAttribute('aria-haspopup','dialog');trigger.setAttribute('aria-expanded','false');
+ if(select.classList.contains('unit-choice'))trigger.classList.add('unit-pick');
+ trigger.setAttribute('aria-label',label+': '+select.options[select.selectedIndex]?.textContent);
+ const selectedText=document.createElement('span');selectedText.className='select-text';selectedText.textContent=select.options[select.selectedIndex]?.textContent || 'Vyber možnost';
+ const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');icon.setAttribute('class','select-chevron');icon.setAttribute('viewBox','0 0 24 24');icon.setAttribute('aria-hidden','true');
+ const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d','m5 9 7 7 7-7');icon.append(path);
+ trigger.append(selectedText,icon);
+ select.after(trigger);select.hidden=true;select.tabIndex=-1;
+ trigger.addEventListener('click',()=>openPicker(select,trigger));
+}
 function initCustomSelects(){
- for(const select of document.querySelectorAll('.field select')){
-  const field=select.closest('.field');const label=field.querySelector(':scope > span')?.textContent || 'Výběr';
-  const trigger=document.createElement('button');trigger.type='button';trigger.className='select-trigger';
-  trigger.setAttribute('aria-haspopup','dialog');trigger.setAttribute('aria-expanded','false');
-   if(select.classList.contains('unit-choice'))trigger.classList.add('unit-pick');
-  trigger.setAttribute('aria-label',label+': '+select.options[select.selectedIndex]?.textContent);
-  const selectedText=document.createElement('span');selectedText.className='select-text';selectedText.textContent=select.options[select.selectedIndex]?.textContent || 'Vyber možnost';
-  const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');icon.setAttribute('class','select-chevron');icon.setAttribute('viewBox','0 0 24 24');icon.setAttribute('aria-hidden','true');
-  const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d','m5 9 7 7 7-7');icon.append(path);
-  trigger.append(selectedText,icon);
-  select.after(trigger);select.hidden=true;select.tabIndex=-1;
-  trigger.addEventListener('click',()=>openPicker(select,trigger));
- }
+ for(const select of document.querySelectorAll('.field select'))enhanceCustomSelect(select);
 }
 pickerSearchInput.addEventListener('input',filterCalculatorOptions);
 $('picker-close').addEventListener('click',closePicker);
@@ -1580,6 +1792,7 @@ document.addEventListener('keydown',e=>{
 });
 
 initCustomSelects();
+initResistorBuilder();
 initSmd();
 initCeramic();
 initNewCalculators();
