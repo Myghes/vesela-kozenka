@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a1326">
 <meta name="description" content="Elektrotechnická kalkulačka Veselá kozenka – Ohmův zákon, rezistory, barevné proužky, SMD kódy, keramické kondenzátory, baterie, vodiče, transformátory, blikání LED, dělič napětí a spotřeba elektřiny.">
-<title>Elektrotechnická kalkulačka Veselá kozenka · v3.1</title>
+<title>Elektrotechnická kalkulačka Veselá kozenka · v3.2</title>
 <link rel="icon" type="image/png" sizes="48x48" href="./favicon-48.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -371,7 +371,7 @@ body.picker-open{overflow:hidden}
  <div class="card">
   <div class="result-label">Schéma zapojení</div>
   <div class="res-view-toolbar" role="group" aria-label="Ovládání pohledu na schéma">
-   <span class="res-view-hint">✋ Chyť a táhni obrázek</span>
+   <span class="res-view-hint">✋ Posuň · 🤏 Přibliž dvěma prsty</span>
    <div class="res-view-actions">
     <button type="button" class="res-view-btn" id="res-zoom-out" aria-label="Oddálit schéma" title="Oddálit">−</button>
     <span class="res-view-zoom" id="res-zoom-level" aria-live="off">100 %</span>
@@ -379,10 +379,10 @@ body.picker-open{overflow:hidden}
     <button type="button" class="res-view-btn res-view-center" id="res-center" title="Zobrazit celý obvod na středu">◎ Vycentrovat</button>
    </div>
   </div>
-  <div class="res-builder-diagram" id="res-diagram" tabindex="0" role="region" aria-label="Schéma zapojení rezistorů. Tažením myši nebo prstem posouvej, tlačítky plus a minus přibližuj.">
+  <div class="res-builder-diagram" id="res-diagram" tabindex="0" role="region" aria-label="Schéma zapojení rezistorů. Jedním prstem nebo myší posouvej, dvěma prsty přibližuj a oddaluj.">
    <svg id="res-diagram-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Obvod rezistorů"></svg>
   </div>
-  <p class="res-builder-diagram-help">Obrázek posouvej myší nebo prstem volně všemi směry. Dvojklikem nebo tlačítkem <strong>Vycentrovat</strong> zobrazíš celý obvod. Fungují i klávesy se šipkami, + a −.</p>
+  <p class="res-builder-diagram-help">Jedním prstem schéma posouváš, <strong>dvěma prsty přibližuješ a oddaluješ</strong>. Na počítači táhni myší. Dvojklik nebo tlačítko <strong>Vycentrovat</strong> zobrazí celý obvod.</p>
   <div class="result-label res-builder-result-heading">Výsledný odpor</div>
   <div id="resistors-result" class="result-grid" aria-live="polite"></div>
   <p class="helper">Každá část tvoří jeden blok, všechny bloky jsou mezi A a B zapojeny za sebou. Sériová část sčítá odpory, paralelní část počítá jejich společný odpor. Nejde zatím o libovolné vnořené propojování větví.</p>
@@ -752,7 +752,7 @@ body.picker-open{overflow:hidden}
  </div>
 </section>
 
- <footer class="footer">🐐 Veselá kozenka · v3.1</footer>
+ <footer class="footer">🐐 Veselá kozenka · v3.2</footer>
 </main>
 <div class="picker-overlay" id="picker-overlay" hidden>
  <div class="picker-dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
@@ -944,7 +944,7 @@ function resistorBuildBlocks(){
 }
 
 /* v3.1: volné 2D posouvání a zoom schématu bez tradičních posuvníků. */
-const resistorView={x:0,y:0,scale:1,ready:false,drag:null};
+const resistorView={x:0,y:0,scale:1,ready:false,drag:null,pointers:new Map(),gesture:null};
 const resistorViewMinZoom=0.04,resistorViewMaxZoom=4;
 function resistorViewDimensions(){
  const svg=$('res-diagram-svg');
@@ -1001,33 +1001,70 @@ function initResistorView(){
  $('res-zoom-out').addEventListener('click',()=>zoomResistorView(.8));
  $('res-center').addEventListener('click',fitResistorView);
  diagram.addEventListener('dblclick',event=>{event.preventDefault();fitResistorView();});
+ // Jedním prstem/myší posouváme. Dva prsty přibližují i oddalují.
+ // Souřadnice bodu mezi prsty zůstávají při změně měřítka na stejném místě schématu.
+ const pointers=resistorView.pointers;
+ const makeGesture=()=>{
+  const touches=[...pointers.values()];
+  const bounds=diagram.getBoundingClientRect();
+  if(touches.length>=2){
+   const a=touches[0],b=touches[1];
+   const centerX=(a.x+b.x)/2-bounds.left;
+   const centerY=(a.y+b.y)/2-bounds.top;
+   const distance=Math.max(1,Math.hypot(a.x-b.x,a.y-b.y));
+   resistorView.gesture={
+    mode:'pinch',distance,startScale:resistorView.scale,
+    worldX:(centerX-resistorView.x)/resistorView.scale,
+    worldY:(centerY-resistorView.y)/resistorView.scale
+   };
+  }else if(touches.length===1){
+   resistorView.gesture={
+    mode:'pan',startX:touches[0].x,startY:touches[0].y,
+    baseX:resistorView.x,baseY:resistorView.y
+   };
+  }else resistorView.gesture=null;
+  diagram.classList.toggle('dragging',touches.length>0);
+ };
  diagram.addEventListener('pointerdown',event=>{
   if(event.pointerType==='mouse'&&event.button!==0)return;
-  if(resistorView.drag)return;
+  if(pointers.size>=2)return;
   ensureResistorView();
-  resistorView.drag={id:event.pointerId,startX:event.clientX,startY:event.clientY,baseX:resistorView.x,baseY:resistorView.y};
-  diagram.classList.add('dragging');
+  pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
   try{diagram.setPointerCapture(event.pointerId)}catch(_){}
+  makeGesture();
   event.preventDefault();
  });
  diagram.addEventListener('pointermove',event=>{
-  const drag=resistorView.drag;
-  if(!drag||drag.id!==event.pointerId)return;
-  resistorView.x=drag.baseX+event.clientX-drag.startX;
-  resistorView.y=drag.baseY+event.clientY-drag.startY;
+  if(!pointers.has(event.pointerId))return;
+  pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+  const gesture=resistorView.gesture;
+  if(!gesture)return;
+  if(gesture.mode==='pan'&&pointers.size===1){
+   resistorView.x=gesture.baseX+event.clientX-gesture.startX;
+   resistorView.y=gesture.baseY+event.clientY-gesture.startY;
+  }else if(gesture.mode==='pinch'&&pointers.size>=2){
+   const [a,b]=[...pointers.values()];
+   const bounds=diagram.getBoundingClientRect();
+   const midpointX=(a.x+b.x)/2-bounds.left;
+   const midpointY=(a.y+b.y)/2-bounds.top;
+   const distance=Math.max(1,Math.hypot(a.x-b.x,a.y-b.y));
+   const scale=Math.max(resistorViewMinZoom,Math.min(resistorViewMaxZoom,gesture.startScale*distance/gesture.distance));
+   resistorView.scale=scale;
+   resistorView.x=midpointX-gesture.worldX*scale;
+   resistorView.y=midpointY-gesture.worldY*scale;
+  }
   applyResistorView();
   event.preventDefault();
  });
- const stopDrag=event=>{
-  const drag=resistorView.drag;
-  if(!drag||drag.id!==event.pointerId)return;
-  resistorView.drag=null;
-  diagram.classList.remove('dragging');
+ const stopPointer=event=>{
+  if(!pointers.has(event.pointerId))return;
+  pointers.delete(event.pointerId);
   try{if(diagram.hasPointerCapture(event.pointerId))diagram.releasePointerCapture(event.pointerId)}catch(_){}
+  makeGesture();
  };
- diagram.addEventListener('pointerup',stopDrag);
- diagram.addEventListener('pointercancel',stopDrag);
- diagram.addEventListener('lostpointercapture',stopDrag);
+ diagram.addEventListener('pointerup',stopPointer);
+ diagram.addEventListener('pointercancel',stopPointer);
+ diagram.addEventListener('lostpointercapture',stopPointer);
  diagram.addEventListener('wheel',event=>{
   if(!event.ctrlKey)return;
   event.preventDefault();
