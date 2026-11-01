@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a1326">
 <meta name="description" content="Elektrotechnická kalkulačka Veselá kozenka – Ohmův zákon, rezistory, barevné proužky, SMD kódy, keramické kondenzátory, baterie, vodiče, transformátory, blikání LED, dělič napětí a spotřeba elektřiny.">
-<title>Elektrotechnická kalkulačka Veselá kozenka · v2.6</title>
+<title>Elektrotechnická kalkulačka Veselá kozenka · v2.7</title>
 <link rel="icon" type="image/png" sizes="48x48" href="./favicon-48.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -191,6 +191,17 @@ body.picker-open{overflow:hidden}
 .ceramic-entry{margin:0 0 14px}
 .ceramic-caption{text-align:center;color:#a9bfd3;font-size:12px;margin:0 0 18px}
 @media(max-width:440px){.ceramic-entry{grid-template-columns:1fr}.ceramic-stage{padding:5px 5px 0}}
+
+
+/* v2.7: hledání kalkulačky uvnitř výběrového okna */
+.picker-search{position:relative;flex:none;margin:12px 13px 1px}
+.picker-search[hidden],.picker-item[hidden],.picker-empty[hidden]{display:none!important}
+.picker-search svg{pointer-events:none;position:absolute;left:15px;top:50%;transform:translateY(-50%);width:20px;height:20px;fill:none;stroke:#91b0c2;stroke-width:2;stroke-linecap:round}
+.picker-search input{display:block;width:100%;height:49px;padding:10px 42px 10px 46px;color:var(--text);background:#0e1b30;border:1px solid #446079;border-radius:12px;font-size:15px;outline:none;-webkit-appearance:none;appearance:none}
+.picker-search input::placeholder{color:#90a6bc}
+.picker-search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #50e3c225}
+.picker-search input::-webkit-search-cancel-button{cursor:pointer}
+.picker-empty{text-align:center;margin:18px 5px;padding:18px 10px;border:1px dashed #476078;border-radius:12px;color:#acc3d7;font-size:14px}
 
 </style>
 </head>
@@ -542,11 +553,15 @@ body.picker-open{overflow:hidden}
  </div>
 </section>
 
- <footer class="footer">🐐 Veselá kozenka · v2.6</footer>
+ <footer class="footer">🐐 Veselá kozenka · v2.7</footer>
 </main>
 <div class="picker-overlay" id="picker-overlay" hidden>
  <div class="picker-dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
   <div class="picker-head"><div><div class="picker-kicker">Veselá kozenka · Výběr</div><div class="picker-title" id="picker-title">Vyber možnost</div></div><button type="button" class="picker-close" id="picker-close" aria-label="Zavřít nabídku">×</button></div>
+  <div class="picker-search" id="picker-search" hidden>
+   <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.4"/><path d="m16 16 4.5 4.5"/></svg>
+   <input id="picker-search-input" type="search" placeholder="Vyhledat kalkulačku…" aria-label="Vyhledat kalkulačku" autocomplete="off" autocapitalize="off" spellcheck="false">
+  </div>
   <div class="picker-options" id="picker-options"></div>
  </div>
 </div>
@@ -1269,7 +1284,18 @@ $('ohm-target').addEventListener('change',updateOhmTarget);for(const id of ['ohm
 setupInputUnits();updateOhmTarget();calcResistors();initBands();calcDivider();calcEnergy();calcReactive('capacitors');calcReactive('inductors');
 
 // Custom offline-friendly modal selects (Android/iOS/desktop).
-const pickerOverlay=$('picker-overlay'),pickerTitle=$('picker-title'),pickerOptions=$('picker-options');
+const pickerOverlay=$('picker-overlay'),pickerTitle=$('picker-title'),pickerOptions=$('picker-options'),pickerSearch=$('picker-search'),pickerSearchInput=$('picker-search-input');
+const pickerEmpty=document.createElement('p');pickerEmpty.className='picker-empty';pickerEmpty.textContent='Žádná kalkulačka neodpovídá hledání.';pickerEmpty.hidden=true;
+function searchNormalize(value){return String(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('cs-CZ').trim()}
+function filterCalculatorOptions(){
+ const query=searchNormalize(pickerSearchInput.value);let matches=0;
+ for(const item of pickerOptions.querySelectorAll('.picker-item')){
+  const match=item.dataset.search.includes(query);
+  item.hidden=!match;if(match)matches++;
+ }
+ pickerEmpty.hidden=matches!==0;
+ pickerOptions.scrollTop=0;
+}
 let activeSelect=null,lastTrigger=null;
 function swatchFor(selectId,index){
  if(selectId==='b1')return colors[index+1][1];
@@ -1297,11 +1323,15 @@ function closePicker(){
 }
 function openPicker(select,trigger){
  activeSelect=select;lastTrigger=trigger;
+ const isCalculator=select.id==='tool-picker';
+ pickerSearch.hidden=!isCalculator;pickerSearchInput.value='';
  const title=select.closest('.field').querySelector(':scope > span');
  pickerTitle.textContent=select.classList.contains('unit-choice')?'Jednotka · '+(title?title.textContent:'hodnota'):(title?title.textContent:'Vyber možnost');
  pickerOptions.replaceChildren();
+ pickerEmpty.hidden=true;
  Array.from(select.options).forEach((option,index)=>{
   const item=document.createElement('button');item.type='button';item.className='picker-item';
+  if(isCalculator)item.dataset.search=searchNormalize(option.textContent);
   const selected=option.value===select.value;item.setAttribute('aria-pressed',String(selected));
   const swatchColor=swatchFor(select.id,index);
   if(swatchColor){const dot=document.createElement('span');dot.className='option-swatch';dot.style.backgroundColor=swatchColor;dot.setAttribute('aria-hidden','true');item.append(dot)}
@@ -1317,11 +1347,17 @@ function openPicker(select,trigger){
   });
   pickerOptions.append(item);
  });
+ if(isCalculator)pickerOptions.append(pickerEmpty);
  pickerOverlay.hidden=false;document.body.classList.add('picker-open');
  trigger.setAttribute('aria-expanded','true');
- const selectedItem=pickerOptions.querySelector('[aria-pressed="true"]');
- (selectedItem||pickerOptions.querySelector('button'))?.focus({preventScroll:true});
- selectedItem?.scrollIntoView({block:'nearest'});
+ if(isCalculator){
+  pickerOptions.scrollTop=0;
+  pickerSearchInput.focus({preventScroll:true});
+ }else{
+  const selectedItem=pickerOptions.querySelector('[aria-pressed="true"]');
+  (selectedItem||pickerOptions.querySelector('button'))?.focus({preventScroll:true});
+  selectedItem?.scrollIntoView({block:'nearest'});
+ }
 }
 function initCustomSelects(){
  for(const select of document.querySelectorAll('.field select')){
@@ -1338,13 +1374,14 @@ function initCustomSelects(){
   trigger.addEventListener('click',()=>openPicker(select,trigger));
  }
 }
+pickerSearchInput.addEventListener('input',filterCalculatorOptions);
 $('picker-close').addEventListener('click',closePicker);
 pickerOverlay.addEventListener('click',e=>{if(e.target===pickerOverlay)closePicker()});
 document.addEventListener('keydown',e=>{
  if(pickerOverlay.hidden)return;
  if(e.key==='Escape'){e.preventDefault();closePicker()}
  if(e.key==='Tab'){
-  const focusables=[$('picker-close'),...pickerOptions.querySelectorAll('button')];
+  const focusables=[$('picker-close'),...(pickerSearch.hidden?[]:[pickerSearchInput]),...Array.from(pickerOptions.querySelectorAll('button')).filter(item=>!item.hidden)];
   const index=focusables.indexOf(document.activeElement);
   if(e.shiftKey&&index<=0){e.preventDefault();focusables[focusables.length-1].focus()}
   else if(!e.shiftKey&&index===focusables.length-1){e.preventDefault();focusables[0].focus()}
