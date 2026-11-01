@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a1326">
 <meta name="description" content="Elektrotechnická kalkulačka Veselá kozenka – Ohmův zákon, rezistory, barevné proužky, SMD kódy, keramické kondenzátory, baterie, vodiče, transformátory, blikání LED, dělič napětí a spotřeba elektřiny.">
-<title>Elektrotechnická kalkulačka Veselá kozenka · v2.8.1</title>
+<title>Elektrotechnická kalkulačka Veselá kozenka · v2.8.2</title>
 <link rel="icon" type="image/png" sizes="48x48" href="./favicon-48.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -230,6 +230,23 @@ body.picker-open{overflow:hidden}
 @media(max-width:560px){.wire-two-col{grid-template-columns:1fr}.wire-pane{padding:14px}.wire-section-title{font-size:17px}}
 @media(max-width:410px){.wire-length-controls{grid-template-columns:1fr;gap:9px}.wire-length-choice{margin:0}.wire-length-choice legend{display:none}.wire-radio-list{gap:12px}.wire-pane{padding:13px}}
 
+
+/* v2.8.2: jednoduchá baterie a srozumitelná volitelná nastavení. */
+.battery-advanced{margin:18px 0 0;border:1px solid #3d6474;border-radius:15px;background:linear-gradient(150deg,#132c3b,#112339);overflow:hidden}
+.battery-advanced-summary{display:flex;flex-direction:column;gap:5px;padding:14px 17px;list-style:none;cursor:pointer;position:relative;padding-right:46px}
+.battery-advanced-summary::-webkit-details-marker{display:none}
+.battery-advanced-summary::after{content:"";position:absolute;right:19px;top:23px;width:10px;height:10px;border-right:2px solid #75e6d2;border-bottom:2px solid #75e6d2;transform:rotate(45deg);transition:transform .15s ease}
+.battery-advanced[open] .battery-advanced-summary::after{transform:translateY(5px) rotate(225deg)}
+.battery-advanced-summary:focus-visible{outline:2px solid var(--accent);outline-offset:-3px}
+.battery-advanced-title{font-size:14px;font-weight:800;color:#b0f5e4;line-height:1.35}
+.battery-optional{font-weight:600;color:#91bed0;font-size:12px}
+.battery-advanced-subtitle{font-size:12px;color:#a6c4d3;line-height:1.4}
+.battery-advanced-body{padding:15px 16px 16px;border-top:1px solid #31566b}
+.battery-setting{min-width:0}
+.battery-setting .field>span{font-size:13px}
+.battery-explanation{color:#a9c4d3;margin:8px 0 0;font-size:12px;line-height:1.55}
+@media(max-width:440px){.battery-advanced-body .fields{grid-template-columns:1fr}.battery-advanced-summary{padding:13px 42px 13px 13px}.battery-advanced-body{padding:13px}}
+
 </style>
 </head>
 <body>
@@ -428,8 +445,8 @@ body.picker-open{overflow:hidden}
 <section class="panel" id="battery" aria-label="Výdrž baterie">
  <div class="card">
   <h2>Výpočet výdrže baterie</h2>
-  <p class="sub">Spočítej orientační dobu provozu zařízení podle kapacity baterie, napětí a odběru.</p>
-  <div class="circuit-mini"><span class="mini-symbol" aria-hidden="true">🔋</span><div class="mini-copy"><strong>Baterie → zařízení</strong>Výpočet energie a času při přibližně konstantním odběru.</div></div>
+  <p class="sub">Zadej kapacitu baterie, její napětí a odběr zařízení. Výdrž se spočítá automaticky.</p>
+  <div class="circuit-mini"><span class="mini-symbol" aria-hidden="true">🔋</span><div class="mini-copy"><strong>Baterie → zařízení</strong>Jednoduchý odhad pro zařízení s přibližně stálým odběrem.</div></div>
   <div class="fields">
    <div class="field"><span>Kapacita baterie</span>
     <div class="control">
@@ -437,12 +454,28 @@ body.picker-open{overflow:hidden}
      <select id="bat-cap-unit" class="unit-choice" aria-label="Jednotka kapacity baterie"><option value="Ah" selected>Ah</option><option value="mAh">mAh</option><option value="Wh">Wh</option><option value="kWh">kWh</option></select>
     </div>
    </div>
-   <label class="field"><span>Jmenovité napětí baterie</span><div class="control"><input id="bat-voltage" type="text" inputmode="decimal" value="12"><span class="unit">V</span></div></label>
+   <label class="field"><span>Napětí baterie</span><div class="control"><input id="bat-voltage" type="text" inputmode="decimal" value="12"><span class="unit">V</span></div></label>
    <div class="field"><span>Odběr zařízení</span><div class="control"><input id="bat-load" class="with-unit" aria-label="Odběr zařízení" type="text" inputmode="decimal" value="20"><select id="bat-load-unit" class="unit-choice" aria-label="Jednotka odběru"><option value="W" selected>W</option><option value="A">A</option><option value="mA">mA</option></select></div></div>
-   <label class="field"><span>Využitelná kapacita</span><div class="control"><input id="bat-usable" type="text" inputmode="decimal" value="80"><span class="unit">%</span></div></label>
-   <label class="field"><span>Účinnost napájení</span><div class="control"><input id="bat-eff" type="text" inputmode="decimal" value="90"><span class="unit">%</span></div></label>
   </div>
-  <p class="calc-hint"><strong>Jak to počítáme:</strong> energie baterie × využitelný podíl × účinnost ÷ příkon zařízení. Reálnou výdrž ovlivní stáří baterie, teplota i velikost odběru.</p>
+  <details class="battery-advanced" id="battery-advanced">
+   <summary class="battery-advanced-summary">
+    <span class="battery-advanced-title">⚙️ Rezerva baterie a ztráty <span class="battery-optional">(volitelné)</span></span>
+    <span class="battery-advanced-subtitle" id="battery-settings-summary">Základní výpočet bez rezervy a ztrát</span>
+   </summary>
+   <div class="battery-advanced-body">
+    <div class="fields">
+     <div class="battery-setting">
+      <label class="field"><span>Kolik baterie chceš využít?</span><div class="control"><input id="bat-usable" type="text" inputmode="decimal" value="100" autocomplete="off"><span class="unit">%</span></div></label>
+      <p class="battery-explanation">100 % = využiješ celou kapacitu. 80 % = necháš 20 % baterie jako rezervu.</p>
+     </div>
+     <div class="battery-setting">
+      <label class="field"><span>Ztráty při napájení</span><div class="control"><input id="bat-loss" type="text" inputmode="decimal" value="0" autocomplete="off"><span class="unit">%</span></div></label>
+      <p class="battery-explanation">0 % = bez ztrát. Například 10 % = část energie se ztratí v měniči či elektronice.</p>
+     </div>
+    </div>
+   </div>
+  </details>
+  <p class="calc-hint"><strong>Výsledek je orientační.</strong> Bez rezervy a ztrát jde o ideální výdrž. Skutečnou výdrž ovlivní typ a stáří baterie, teplota i zatížení. Pokud zadáváš odběr v A nebo mA, počítá se s napětím baterie; při jiném napětí zařízení použij příkon ve W.</p>
  </div>
  <div class="card"><div class="result-label">Orientační výdrž</div><div id="battery-result" class="result-grid" aria-live="polite"></div></div>
 </section>
@@ -625,7 +658,7 @@ body.picker-open{overflow:hidden}
  </div>
 </section>
 
- <footer class="footer">🐐 Veselá kozenka · v2.8.1</footer>
+ <footer class="footer">🐐 Veselá kozenka · v2.8.2</footer>
 </main>
 <div class="picker-overlay" id="picker-overlay" hidden>
  <div class="picker-dialog" role="dialog" aria-modal="true" aria-labelledby="picker-title">
@@ -1111,21 +1144,26 @@ function batteryLoadW(amount,unit,voltage){
 }
 function calcBattery(){
  const capacity=parse($('bat-cap').value),voltage=parse($('bat-voltage').value),load=parse($('bat-load').value);
- const use=parse($('bat-usable').value),eff=parse($('bat-eff').value);
- if(![capacity,voltage,load,use,eff].every(Number.isFinite)||capacity<=0||voltage<=0||load<=0||use<=0||use>100||eff<=0||eff>100){
-  fail('battery-result','Zadej kladnou kapacitu, napětí a odběr. Procenta musí být větší než 0 a nejvýše 100.');return;
+ const use=parse($('bat-usable').value),loss=parse($('bat-loss').value);
+ const summary=$('battery-settings-summary');
+ if(Number.isFinite(use)&&Number.isFinite(loss)&&use>0&&use<=100&&loss>=0&&loss<100){
+  const reserve=100-use;
+  summary.textContent=reserve===0&&loss===0?'Základní výpočet bez rezervy a ztrát':'Rezerva '+number(reserve)+' % · ztráty '+number(loss)+' %';
+ }else summary.textContent='Zkontroluj nastavená procenta';
+ if(![capacity,voltage,load,use,loss].every(Number.isFinite)||capacity<=0||voltage<=0||load<=0||use<=0||use>100||loss<0||loss>=100){
+  fail('battery-result','Zadej kladnou kapacitu, napětí a odběr. Využití baterie musí být nad 0 až 100 %, ztráty od 0 do méně než 100 %.');return;
  }
  const wh=batteryCapacityWh(capacity,$('bat-cap-unit').value,voltage);
  const watts=batteryLoadW(load,$('bat-load-unit').value,voltage);
- const usableWh=wh*(use/100)*(eff/100),hours=usableWh/watts;
+ const usableWh=wh*(use/100)*(1-loss/100),hours=usableWh/watts;
  if(![wh,watts,usableWh,hours].every(Number.isFinite)||hours<=0){
   fail('battery-result','Hodnoty jsou mimo rozsah výpočtu.');return;
  }
  show('battery-result',[
   metric('Odhadovaná výdrž',number(hours)+' h',true),
   metric('Přibližně',number(hours/24)+' dne'),
-  metric('Využitelná energie',number(usableWh)+' Wh'),
-  metric('Odběr zařízení',pretty(watts,'P'),false)
+  metric('Energie dostupná zařízení',number(usableWh)+' Wh'),
+  metric('Příkon zařízení',pretty(watts,'P'))
  ]);
 }
 function onBatteryUnitChanged(id,previous,newUnit){
@@ -1292,7 +1330,7 @@ function calcTransformer(){
 }
 function initNewCalculators(){
  const calcEvents={
-  'bat-cap':calcBattery,'bat-voltage':calcBattery,'bat-load':calcBattery,'bat-usable':calcBattery,'bat-eff':calcBattery,
+  'bat-cap':calcBattery,'bat-voltage':calcBattery,'bat-load':calcBattery,'bat-usable':calcBattery,'bat-loss':calcBattery,
   'wire-length':calcWire,'wire-area':calcWire,'wire-current':calcWire,'wire-power':calcWire,'wire-voltage':calcWire,'wire-temperature':calcWire,'wire-cos':calcWire,
   'tr-u1':calcTransformer,'tr-u2':calcTransformer,'tr-n1':calcTransformer,'tr-f':calcTransformer,'tr-area':calcTransformer,'tr-b':calcTransformer
  };
